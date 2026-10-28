@@ -1,0 +1,12 @@
+{
+	"servers": {
+		"foundrylens-web": {
+			"type": "stdio",
+			"command": "node",
+			"args": [
+				"${workspaceFolder}/apps/mcp/dist/index.js"
+			]
+		}
+	},
+	"inputs": []
+}
