@@ -1,5 +1,7 @@
+// DOM helpers used by the content script.
 import type { ElementKind } from "../shared/types";
 
+// Elements that the agent may interact with or read.
 export const INTERACTIVE_SELECTOR = [
   "a[href]",
   "button",
@@ -17,14 +19,17 @@ export const INTERACTIVE_SELECTOR = [
   "[contenteditable='true']",
 ].join(", ");
 
+// Collapse whitespace so labels are easy to read.
 export function clean(value: string | null | undefined): string {
   return (value ?? "").replace(/\s+/g, " ").trim();
 }
 
+// Trim long text and add an ellipsis.
 export function shorten(value: string, maxLength = 120): string {
   return value.length <= maxLength ? value : `${value.slice(0, maxLength - 1)}…`;
 }
 
+// Check whether an element is actually visible on screen.
 export function isVisible(element: Element): boolean {
   if (element.closest("[hidden], [aria-hidden='true']")) return false;
   const style = getComputedStyle(element);
@@ -33,6 +38,7 @@ export function isVisible(element: Element): boolean {
   return rect.width > 0 && rect.height > 0;
 }
 
+// Classify an element for the inspection result.
 export function elementKind(element: Element): ElementKind {
   if (element instanceof HTMLAnchorElement) return "link";
   if (element instanceof HTMLButtonElement) return "button";
@@ -47,6 +53,7 @@ export function elementKind(element: Element): ElementKind {
   return "interactive";
 }
 
+// Find the best human-readable name for an element.
 export function accessibleName(element: Element): string {
   const labelledBy = element.getAttribute("aria-labelledby");
   if (labelledBy) {

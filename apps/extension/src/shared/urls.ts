@@ -1,5 +1,7 @@
+// Helpers for validating URLs and building Chrome permission patterns.
 import { ExtensionError } from "./errors";
 
+// Return true only for normal http and https pages.
 export function isSupportedPageUrl(value: string): boolean {
   try {
     const url = new URL(value);
@@ -9,6 +11,7 @@ export function isSupportedPageUrl(value: string): boolean {
   }
 }
 
+// Build the Chrome permission pattern for a page's origin.
 export function originPattern(value: string): string {
   let url: URL;
   try {

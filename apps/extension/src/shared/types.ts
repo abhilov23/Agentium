@@ -1,3 +1,4 @@
+// Result types shared by the extension and the MCP server.
 export type ElementKind =
   | "link"
   | "button"
@@ -9,6 +10,7 @@ export type ElementKind =
   | "editable"
   | "interactive";
 
+// Basic details about a browser tab.
 export interface TabInfo {
   id: number;
   title: string;
@@ -17,11 +19,21 @@ export interface TabInfo {
   windowId: number;
 }
 
+// Result returned after closing a tab.
 export interface ClosedTabResult {
   tabId: number;
   closed: true;
 }
 
+export interface NavigationState {
+  tabId: number;
+  url: string | null;
+  pendingUrl: string | null;
+  title: string | null;
+  status: string | null;
+}
+
+// One interactive element found during page inspection.
 export interface InspectedElement {
   ref: string;
   kind: ElementKind;
@@ -37,6 +49,7 @@ export interface InspectedElement {
   disabled?: boolean;
 }
 
+// Page data returned by the content script.
 export interface PageInspectionResult {
   url: string;
   title: string;
@@ -46,26 +59,31 @@ export interface PageInspectionResult {
   elements: InspectedElement[];
 }
 
+// Inspection result with the tab id added by the service worker.
 export interface InspectionResult extends PageInspectionResult {
   tabId: number;
 }
 
+// Page state returned after a click or type action.
 export interface PageInteractionResult {
   url: string;
   title: string;
 }
 
+// Interaction result with the tab id and action details added.
 export interface InteractionResult extends PageInteractionResult {
   tabId: number;
   ref: string;
   action: "click" | "type";
 }
 
+// A link returned during page extraction.
 export interface ExtractedLink {
   text: string;
   href: string;
 }
 
+// Text or links returned by the content script.
 export interface PageExtractionResult {
   url: string;
   title: string;
@@ -75,6 +93,7 @@ export interface PageExtractionResult {
   truncated: boolean;
 }
 
+// Extraction result with the tab id added by the service worker.
 export interface ExtractionResult extends PageExtractionResult {
   tabId: number;
 }

@@ -1,12 +1,15 @@
+// Finds interactive elements and returns a compact page summary.
 import type { InspectedElement, PageInspectionResult } from "../shared/types";
 import { accessibleName, clean, elementKind, INTERACTIVE_SELECTOR, isVisible, shorten } from "./dom";
 import type { ElementRegistry } from "./refs";
 
+// Do not expose passwords, files, or payment details.
 function hasSensitiveValue(element: HTMLInputElement): boolean {
   if (element.type === "password" || element.type === "file") return true;
   return /(?:password|one-time-code|cc-)/i.test(element.autocomplete);
 }
 
+// Scan the page and register refs for each visible interactive element.
 export function inspectPage(registry: ElementRegistry, maxElements = 120): PageInspectionResult {
   const limit = Math.min(Math.max(maxElements, 1), 300);
   const candidates = Array.from(document.querySelectorAll(INTERACTIVE_SELECTOR)).filter((element) => isVisible(element));

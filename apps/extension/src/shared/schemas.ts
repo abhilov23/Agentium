@@ -1,3 +1,4 @@
+// Validation schemas for messages entering the service worker.
 import { z } from "zod";
 
 const requestId = z.string().min(1);
@@ -6,6 +7,7 @@ const boundedInteger = (min: number, max: number) => z.number().int().min(min).m
 const requiredTabId = z.number().int().positive();
 const tabId = requiredTabId.optional();
 
+// All requests accepted by the service worker.
 export const extensionRequestSchema = z.discriminatedUnion("action", [
   z.object({ id: requestId, action: z.literal("LIST_TABS"), payload: emptyPayload }),
   z.object({ id: requestId, action: z.literal("GET_ACTIVE_TAB"), payload: emptyPayload }),
@@ -48,6 +50,59 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     id: requestId,
+    action: z.literal("GO_BACK"),
+    payload: z.object({ tabId }).strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("GO_FORWARD"),
+    payload: z.object({ tabId }).strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("RELOAD_TAB"),
+    payload: z.object({ tabId }).strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("STOP_LOADING"),
+    payload: z.object({ tabId }).strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("GET_NAVIGATION_STATE"),
+    payload: z.object({ tabId }).strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("SCROLL_PAGE"),
+    payload: z
+      .object({
+        tabId,
+        x: z.number().int().optional(),
+        y: z.number().int().optional(),
+        direction: z.enum(["top", "bottom", "up", "down", "left", "right"]).optional(),
+        behavior: z.enum(["auto", "smooth"]).optional(),
+      })
+      .strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("HOVER_ELEMENT"),
+    payload: z.object({ tabId, ref: z.string().regex(/^e\d+$/) }).strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("CAPTURE_SCREENSHOT"),
+    payload: z.object({ tabId, fullPage: z.boolean().optional() }).strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("GET_COOKIES"),
+    payload: z.object({ tabId, url: z.string().url().max(2048).optional() }).strict(),
+  }),
+  z.object({
+    id: requestId,
     action: z.literal("EXTRACT_CONTENT"),
     payload: z
       .object({
@@ -60,6 +115,7 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
 ]);
 
+// Shape used to validate replies from content scripts.
 export const responseEnvelopeSchema = z.object({
   id: z.string(),
   success: z.boolean(),

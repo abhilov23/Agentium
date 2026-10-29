@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Agentium Browser Extension",
   "version": "0.1.0",
-  "description": "Browser-side adapter for FoundryLens. Inspect and interact with pages you explicitly authorize.",
+  "description": "Browser-side adapter, It allows to Inspect and interact with pages you explicitly authorize.",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "icons/icon16.png",
@@ -11,7 +11,7 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "FoundryLens",
+    "default_title": "Agentium",
     "default_popup": "popup/index.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -24,6 +24,7 @@
     "service_worker": "service-worker/index.js",
     "type": "module"
   },
-  "permissions": ["tabs", "scripting", "alarms"],
+  
+  "permissions": ["tabs", "scripting", "alarms", "storage" , "webNavigation", "notifications", "downloads", "cookies", "debugger"],
   "host_permissions": ["http://*/*", "https://*/*"]
 }

@@ -1,3 +1,4 @@
+// Maintains the WebSocket connection from the extension to the MCP server.
 import { executeMessage } from "./execute";
 import {
   BRIDGE_RECONNECT_ALARM,
@@ -17,6 +18,7 @@ let lastError: string | null = null;
 let lastConnectedAt: number | null = null;
 let nextRetryAt: number | null = null;
 
+// Return the current connection state for the popup.
 export function getBridgeStatus(): BridgeStatus {
   return {
     state,
@@ -27,6 +29,7 @@ export function getBridgeStatus(): BridgeStatus {
   };
 }
 
+// Open the WebSocket bridge connection and set up reconnect handling.
 export function connectBridge(): void {
   if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
     return;
@@ -86,6 +89,7 @@ export function connectBridge(): void {
   });
 }
 
+// Force a fresh bridge connection, usually from the popup Retry button.
 export function reconnectBridge(): BridgeStatus {
   clearReconnectTimer();
   reconnectDelay = RECONNECT_MIN_MS;
@@ -105,6 +109,7 @@ export function reconnectBridge(): BridgeStatus {
   return getBridgeStatus();
 }
 
+// Retry with backoff and keep an alarm alive for service worker restarts.
 function scheduleReconnect(): void {
   if (reconnectTimer !== undefined) return;
 
@@ -120,12 +125,14 @@ function scheduleReconnect(): void {
   reconnectDelay = Math.min(reconnectDelay * 2, RECONNECT_MAX_MS);
 }
 
+// Cancel the pending reconnect timer.
 function clearReconnectTimer(): void {
   if (reconnectTimer === undefined) return;
   clearTimeout(reconnectTimer);
   reconnectTimer = undefined;
 }
 
+// Handle a bridge message: answer pings or run the requested action.
 async function handleBridgeMessage(data: unknown, source: WebSocket): Promise<void> {
   if (typeof data !== "string") return;
 
@@ -144,16 +151,19 @@ async function handleBridgeMessage(data: unknown, source: WebSocket): Promise<vo
   sendOn(source, await executeMessage(message));
 }
 
+// Send JSON only when the WebSocket is open.
 function sendOn(target: WebSocket, message: unknown): void {
   if (target.readyState === WebSocket.OPEN) {
     target.send(JSON.stringify(message));
   }
 }
 
+// Check whether a message is the bridge heartbeat.
 function isPing(value: unknown): boolean {
   return typeof value === "object" && value !== null && (value as { type?: unknown }).type === "ping";
 }
 
+// Build a readable reason for a closed bridge connection.
 function closeMessage(event: CloseEvent, fallback: string | null): string {
   if (event.reason) return event.reason;
   if (fallback) return fallback;
@@ -163,6 +173,7 @@ function closeMessage(event: CloseEvent, fallback: string | null): string {
   return `The MCP bridge closed the connection (code ${event.code}). Retrying automatically.`;
 }
 
+// Update the toolbar badge and tooltip to show bridge status.
 function updateActionStatus(): void {
   const badge = state === "connected" ? "ON" : state === "connecting" ? "..." : "";
   const title =

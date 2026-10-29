@@ -1,3 +1,4 @@
+// Read the request id from a message, even if the message is malformed.
 export function requestIdOf(value: unknown): string {
   if (typeof value === "object" && value !== null && "id" in value) {
     const id = (value as { id?: unknown }).id;

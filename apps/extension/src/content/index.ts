@@ -1,9 +1,10 @@
+// Content script entry point: runs page actions inside the current tab.
 import { errorMessage } from "../shared/errors";
 import type { PageRequest, ResponseEnvelope } from "../shared/protocol";
 import { requestIdOf } from "../shared/request-id";
 import { extractContent } from "./extraction";
 import { inspectPage } from "./inspection";
-import { clickElement, typeElement } from "./interaction";
+import { clickElement, hoverElement, scrollPage, typeElement } from "./interaction";
 import { ElementRegistry } from "./refs";
 import { parsePageRequest } from "./validation";
 
@@ -15,6 +16,7 @@ declare global {
 
 const registry = new ElementRegistry();
 
+// Run the requested page action.
 function handleRequest(request: PageRequest): unknown {
   switch (request.action) {
     case "PING":
@@ -25,11 +27,16 @@ function handleRequest(request: PageRequest): unknown {
       return clickElement(registry, request.payload.ref);
     case "TYPE_ELEMENT":
       return typeElement(registry, request.payload.ref, request.payload.text, request.payload.submit);
+    case "SCROLL_PAGE":
+      return scrollPage(request.payload);
+    case "HOVER_ELEMENT":
+      return hoverElement(registry, request.payload.ref);
     case "EXTRACT_CONTENT":
       return extractContent(request.payload);
   }
 }
 
+// Inject the listeners only once per page.
 if (!window.__foundryLensContentLoaded) {
   window.__foundryLensContentLoaded = true;
 

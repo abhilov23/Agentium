@@ -1,3 +1,4 @@
+// Service worker entry point: connects to the MCP bridge and routes messages.
 import type { ResponseEnvelope } from "../shared/protocol";
 import {
   BRIDGE_RECONNECT_ALARM,
@@ -7,6 +8,7 @@ import {
 import { connectBridge, getBridgeStatus, reconnectBridge } from "./bridge";
 import { executeMessage } from "./execute";
 
+// Handle popup messages and return a response asynchronously when needed.
 function handleMessage(
   message: unknown,
   sender: chrome.runtime.MessageSender,
@@ -24,6 +26,7 @@ function handleMessage(
   return true;
 }
 
+// Register listeners and connect as soon as the service worker starts.
 chrome.runtime.onMessage.addListener(handleMessage);
 chrome.runtime.onStartup.addListener(connectBridge);
 chrome.runtime.onInstalled.addListener(connectBridge);

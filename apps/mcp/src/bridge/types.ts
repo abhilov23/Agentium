@@ -1,3 +1,4 @@
+// Message contracts shared between the MCP server and the Chrome extension.
 export type ElementKind =
   | "link"
   | "button"
@@ -9,6 +10,7 @@ export type ElementKind =
   | "editable"
   | "interactive";
 
+// Basic details about a browser tab.
 export interface TabInfo {
   id: number;
   title: string;
@@ -17,11 +19,13 @@ export interface TabInfo {
   windowId: number;
 }
 
+// Result returned after closing a tab.
 export interface ClosedTabResult {
   tabId: number;
   closed: true;
 }
 
+// One interactive element found by browser_inspect.
 export interface InspectedElement {
   ref: string;
   kind: ElementKind;
@@ -37,6 +41,7 @@ export interface InspectedElement {
   disabled?: boolean;
 }
 
+// Full result returned by browser_inspect.
 export interface InspectionResult {
   tabId: number;
   url: string;
@@ -47,6 +52,7 @@ export interface InspectionResult {
   elements: InspectedElement[];
 }
 
+// Result returned after a click or type action.
 export interface InteractionResult {
   tabId: number;
   ref: string;
@@ -55,11 +61,13 @@ export interface InteractionResult {
   title: string;
 }
 
+// A link returned by browser_extract.
 export interface ExtractedLink {
   text: string;
   href: string;
 }
 
+// Text or links returned by browser_extract.
 export interface ExtractionResult {
   tabId: number;
   url: string;
@@ -72,6 +80,7 @@ export interface ExtractionResult {
 
 export type EmptyPayload = Record<never, never>;
 
+// Every action the MCP server can send to the extension.
 export interface BridgeActionMap {
   LIST_TABS: { payload: EmptyPayload; result: TabInfo[] };
   OPEN_TAB: {
@@ -85,6 +94,32 @@ export interface BridgeActionMap {
   CLOSE_TAB: {
     payload: { tabId: number };
     result: ClosedTabResult;
+  };
+  GO_BACK: {
+    payload: { tabId?: number | undefined };
+    result: TabInfo;
+  };
+  GO_FORWARD: {
+    payload: { tabId?: number | undefined };
+    result: TabInfo;
+  };
+  RELOAD_TAB: {
+    payload: { tabId?: number | undefined };
+    result: TabInfo;
+  };
+  STOP_LOADING: {
+    payload: { tabId?: number | undefined };
+    result: TabInfo;
+  };
+  GET_NAVIGATION_STATE: {
+    payload: { tabId?: number | undefined };
+    result: {
+      tabId: number;
+      url: string | null;
+      pendingUrl: string | null;
+      title: string | null;
+      status: string | null;
+    };
   };
   INSPECT_PAGE: {
     payload: { tabId?: number | undefined; maxElements?: number | undefined };
@@ -102,6 +137,22 @@ export interface BridgeActionMap {
     payload: { tabId?: number | undefined; url: string };
     result: TabInfo;
   };
+  SCROLL_PAGE: {
+    payload: { tabId?: number | undefined; x?: number | undefined; y?: number | undefined; direction?: string | undefined; behavior?: "auto" | "smooth" | undefined };
+    result: { tabId: number; url: string; title: string; x: number; y: number };
+  };
+  HOVER_ELEMENT: {
+    payload: { tabId?: number | undefined; ref: string };
+    result: { tabId: number; ref: string; url: string; title: string; x: number; y: number };
+  };
+  CAPTURE_SCREENSHOT: {
+    payload: { tabId?: number | undefined; fullPage?: boolean | undefined };
+    result: { tabId: number; dataUrl: string; width: number; height: number };
+  };
+  GET_COOKIES: {
+    payload: { tabId?: number | undefined; url?: string | undefined };
+    result: { tabId: number; url: string; cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number | null; secure: boolean; httpOnly: boolean; sameSite?: string | null }> };
+  };
   EXTRACT_CONTENT: {
     payload: {
       tabId?: number | undefined;
@@ -115,10 +166,12 @@ export interface BridgeActionMap {
 
 export type BridgeAction = keyof BridgeActionMap;
 
+// Request sent over the WebSocket bridge.
 export type BridgeRequest = {
   [Action in BridgeAction]: { id: string; action: Action; payload: BridgeActionMap[Action]["payload"] };
 }[BridgeAction];
 
+// Response returned by the extension for a bridge request.
 export type BridgeResponse =
   | { id: string; success: true; data?: unknown }
   | { id: string; success: false; error: string };

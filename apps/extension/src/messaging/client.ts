@@ -1,6 +1,8 @@
+// Client used by the popup to send actions to the service worker.
 import { errorMessage } from "../shared/errors";
 import type { ExtensionAction, ExtensionActionMap, ResponseEnvelope } from "../shared/protocol";
 
+// Validate a response from the service worker.
 function parseResponse(raw: unknown): ResponseEnvelope | null {
   if (typeof raw !== "object" || raw === null) return null;
   const record = raw as { id?: unknown; success?: unknown; data?: unknown; error?: unknown };
@@ -15,6 +17,7 @@ function parseResponse(raw: unknown): ResponseEnvelope | null {
   };
 }
 
+// Send an action to the service worker and unwrap its result.
 export async function sendRequest<Action extends ExtensionAction>(
   action: Action,
   payload: ExtensionActionMap[Action]["payload"],

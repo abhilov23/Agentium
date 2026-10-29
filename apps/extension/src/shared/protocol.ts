@@ -1,3 +1,4 @@
+// Message shapes shared by the popup, service worker, and page helper.
 import type { z } from "zod";
 import type { extensionRequestSchema } from "./schemas";
 import type {
@@ -13,6 +14,7 @@ import type {
 
 export type EmptyPayload = Record<never, never>;
 
+// Actions the popup or MCP server can send to the service worker.
 export interface ExtensionActionMap {
   LIST_TABS: { payload: EmptyPayload; result: TabInfo[] };
   GET_ACTIVE_TAB: { payload: EmptyPayload; result: TabInfo | null };
@@ -27,6 +29,48 @@ export interface ExtensionActionMap {
   CLOSE_TAB: {
     payload: { tabId: number };
     result: ClosedTabResult;
+  };
+  GO_BACK: {
+    payload: { tabId?: number | undefined };
+    result: TabInfo;
+  };
+  GO_FORWARD: {
+    payload: { tabId?: number | undefined };
+    result: TabInfo;
+  };
+  RELOAD_TAB: {
+    payload: { tabId?: number | undefined };
+    result: TabInfo;
+  };
+  STOP_LOADING: {
+    payload: { tabId?: number | undefined };
+    result: TabInfo;
+  };
+  GET_NAVIGATION_STATE: {
+    payload: { tabId?: number | undefined };
+    result: {
+      tabId: number;
+      url: string | null;
+      pendingUrl: string | null;
+      title: string | null;
+      status: string | null;
+    };
+  };
+  SCROLL_PAGE: {
+    payload: { tabId?: number | undefined; x?: number | undefined; y?: number | undefined; direction?: string | undefined; behavior?: "auto" | "smooth" | undefined };
+    result: { tabId: number; url: string; title: string; x: number; y: number };
+  };
+  HOVER_ELEMENT: {
+    payload: { tabId?: number | undefined; ref: string };
+    result: { tabId: number; ref: string; url: string; title: string; x: number; y: number };
+  };
+  CAPTURE_SCREENSHOT: {
+    payload: { tabId?: number | undefined; fullPage?: boolean | undefined };
+    result: { tabId: number; dataUrl: string; width: number; height: number };
+  };
+  GET_COOKIES: {
+    payload: { tabId?: number | undefined; url?: string | undefined };
+    result: { tabId: number; url: string; cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number | null; secure: boolean; httpOnly: boolean; sameSite?: string | null }> };
   };
   INSPECT_PAGE: {
     payload: { tabId?: number | undefined; maxElements?: number | undefined };
@@ -57,6 +101,7 @@ export interface ExtensionActionMap {
 
 export type ExtensionAction = keyof ExtensionActionMap;
 
+// Actions the service worker can send to the content script on a page.
 export interface PageActionMap {
   PING: { payload: EmptyPayload; result: { ready: true } };
   INSPECT_PAGE: { payload: { maxElements?: number | undefined }; result: PageInspectionResult };
@@ -64,6 +109,14 @@ export interface PageActionMap {
   TYPE_ELEMENT: {
     payload: { ref: string; text: string; submit?: boolean | undefined };
     result: PageInteractionResult;
+  };
+  SCROLL_PAGE: {
+    payload: { x?: number | undefined; y?: number | undefined; direction?: string | undefined; behavior?: "auto" | "smooth" | undefined };
+    result: { x: number; y: number };
+  };
+  HOVER_ELEMENT: {
+    payload: { ref: string };
+    result: { x: number; y: number };
   };
   EXTRACT_CONTENT: {
     payload: { format?: "text" | "links" | undefined; maxChars?: number | undefined; maxItems?: number | undefined };
@@ -73,11 +126,14 @@ export interface PageActionMap {
 
 export type PageAction = keyof PageActionMap;
 
+// Validated request sent to the service worker.
 export type ExtensionRequest = z.infer<typeof extensionRequestSchema>;
+// Request sent to the content script on a page.
 export type PageRequest = {
   [Action in PageAction]: { id: string; action: Action; payload: PageActionMap[Action]["payload"] };
 }[PageAction];
 
+// Standard success or error reply for an extension request.
 export type ResponseEnvelope<T = unknown> =
   | { id: string; success: true; data: T }
   | { id: string; success: false; error: string };

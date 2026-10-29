@@ -1,7 +1,9 @@
+// Validates messages sent from the service worker to the page helper.
 import type { PageRequest } from "../shared/protocol";
 
 const REF_PATTERN = /^e\d+$/;
 
+// Validate an incoming page request and narrow its payload.
 export function parsePageRequest(value: unknown): PageRequest | null {
   if (!isRecord(value)) return null;
 
@@ -57,10 +59,12 @@ export function parsePageRequest(value: unknown): PageRequest | null {
   }
 }
 
+// Check for a plain object.
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+// Check for an integer within the allowed range.
 function isBoundedInteger(value: unknown, min: number, max: number): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= min && value <= max;
 }

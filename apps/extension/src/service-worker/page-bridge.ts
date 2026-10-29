@@ -1,7 +1,9 @@
+// Injects and communicates with the content script running in a tab.
 import { ExtensionError, errorMessage } from "../shared/errors";
 import type { PageAction, PageActionMap, PageRequest } from "../shared/protocol";
 import { responseEnvelopeSchema } from "../shared/schemas";
 
+// Check whether the content script is already running in a tab.
 async function ping(tabId: number): Promise<boolean> {
   const request: PageRequest = { id: crypto.randomUUID(), action: "PING", payload: {} };
   try {
@@ -13,6 +15,7 @@ async function ping(tabId: number): Promise<boolean> {
   }
 }
 
+// Inject the content script when it is missing.
 export async function ensureContentScript(tabId: number): Promise<void> {
   if (await ping(tabId)) return;
 
@@ -29,6 +32,7 @@ export async function ensureContentScript(tabId: number): Promise<void> {
   }
 }
 
+// Send an action to the content script and return its result.
 export async function sendPageRequest<Action extends PageAction>(
   tabId: number,
   action: Action,

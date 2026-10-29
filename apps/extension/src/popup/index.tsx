@@ -1,3 +1,4 @@
+// Popup UI: shows bridge status, tabs, page actions, and recent activity.
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { createRoot } from "react-dom/client";
@@ -15,6 +16,7 @@ import { isSupportedPageUrl, originPattern } from "../shared/urls";
 type ActivityTone = "info" | "success" | "error";
 type SiteState = "unknown" | "allowed" | "missing" | "unsupported";
 
+// One line in the activity log.
 interface ActivityEntry {
   id: string;
   message: string;
@@ -22,12 +24,14 @@ interface ActivityEntry {
   timestamp: Date;
 }
 
+// Counts shown above the inspected element list.
 interface ElementMeta {
   returned: number;
   total: number;
   truncated: boolean;
 }
 
+// Text currently shown in the result card.
 interface ResultState {
   title: string;
   body: string;
@@ -39,14 +43,17 @@ const timeFormatter = new Intl.DateTimeFormat(undefined, {
   second: "2-digit",
 });
 
+// Use a readable fallback when a tab has no title.
 function titleOf(tab: TabInfo): string {
   return tab.title || "(untitled)";
 }
 
+// Use a readable fallback when a tab has no URL.
 function urlOf(tab: TabInfo): string {
   return tab.url || "(no URL)";
 }
 
+// Get the first letter of the site host for the tab avatar.
 function initialOf(tab: TabInfo): string {
   try {
     const host = new URL(tab.url).hostname.replace(/^www\./, "");
@@ -56,6 +63,7 @@ function initialOf(tab: TabInfo): string {
   }
 }
 
+// Add https:// when needed and reject non-web URLs.
 function normalizeUrl(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) throw new Error("Enter a URL to navigate to.");
@@ -74,6 +82,7 @@ function normalizeUrl(value: string): string {
   return url.href;
 }
 
+// Short status text for the bridge pill.
 function bridgeLabel(state: BridgeConnectionState | null): string {
   if (state === "connected") return "Connected";
   if (state === "connecting") return "Connecting";
@@ -81,6 +90,7 @@ function bridgeLabel(state: BridgeConnectionState | null): string {
   return "Checking";
 }
 
+// Detailed bridge message including the next retry time.
 function bridgeDetail(status: BridgeStatus): string {
   if (status.state === "connecting") {
     return "Waiting for the local MCP bridge to accept the connection.";
@@ -91,6 +101,7 @@ function bridgeDetail(status: BridgeStatus): string {
   return retrySeconds !== null && retrySeconds > 0 ? `${base} Retrying in ${retrySeconds}s.` : base;
 }
 
+// Inline SVG icons used by the popup.
 function IconInspect() {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true">
@@ -188,6 +199,7 @@ function LogoMark() {
   );
 }
 
+// Brand header with the current bridge status.
 function Header({ bridge }: { bridge: BridgeStatus | null }) {
   return (
     <header className="app-header">
@@ -214,6 +226,7 @@ function Header({ bridge }: { bridge: BridgeStatus | null }) {
   );
 }
 
+// Warning banner shown when the MCP bridge is offline or connecting.
 function BridgeBanner({
   status,
   reconnecting,
@@ -245,6 +258,7 @@ function BridgeBanner({
   );
 }
 
+// Summary of the active tab with quick inspect and extract actions.
 function ActiveCard({
   activeTab,
   loading,
@@ -336,6 +350,7 @@ function ActiveCard({
   );
 }
 
+// URL form for navigating the active tab.
 function NavigateCard({
   value,
   disabled,
@@ -377,6 +392,7 @@ function NavigateCard({
   );
 }
 
+// Card for copied or extracted text.
 function ResultCard({
   result,
   onCopy,
@@ -407,6 +423,7 @@ function ResultCard({
   );
 }
 
+// One inspected element with click and fill controls.
 function ElementRow({
   element,
   onClick,
@@ -478,6 +495,7 @@ function ElementRow({
   );
 }
 
+// List of elements found by the last page inspection.
 function ElementsCard({
   elements,
   meta,
@@ -525,6 +543,7 @@ function ElementsCard({
   );
 }
 
+// List of all open browser tabs.
 function TabsCard({
   tabs,
   loading,
@@ -578,6 +597,7 @@ function TabsCard({
   );
 }
 
+// Recent bridge events and page actions.
 function ActivityCard({
   activity,
   onClear,
@@ -618,6 +638,7 @@ function ActivityCard({
   );
 }
 
+// Footer with privacy note and extension version.
 function Footer({ version }: { version: string }) {
   return (
     <footer className="footer">
@@ -631,7 +652,9 @@ function Footer({ version }: { version: string }) {
   );
 }
 
+// Main popup screen and shared application state.
 function App() {
+  // Bridge, tab, inspection, extraction, and activity state.
   const [bridge, setBridge] = useState<BridgeStatus | null>(null);
   const [reconnecting, setReconnecting] = useState(false);
   const [activeTab, setActiveTab] = useState<TabInfo | null>(null);
@@ -650,6 +673,7 @@ function App() {
   const [navigateUrl, setNavigateUrl] = useState("");
   const previousBridgeState = useRef<BridgeConnectionState | null>(null);
 
+  // Add an entry to the activity log, keeping only the newest 30.
   const logActivity = useCallback((message: string, tone: ActivityTone = "info") => {
     setActivity((current) =>
       [
@@ -664,6 +688,7 @@ function App() {
     );
   }, []);
 
+  // Update bridge state and log meaningful connection changes.
   const applyBridgeStatus = useCallback(
     (status: BridgeStatus) => {
       setBridge(status);
@@ -690,6 +715,7 @@ function App() {
     [logActivity],
   );
 
+  // Reload the active tab and check whether its site is allowed.
   const refreshActiveTab = useCallback(async (): Promise<TabInfo | null> => {
     try {
       const tab = await sendRequest("GET_ACTIVE_TAB", {});
@@ -722,6 +748,7 @@ function App() {
     }
   }, []);
 
+  // Reload the list of open tabs.
   const refreshTabs = useCallback(async () => {
     setTabsLoading(true);
     try {
@@ -732,6 +759,7 @@ function App() {
     }
   }, []);
 
+  // Run an async action and log any failure.
   const run = useCallback(
     (task: () => Promise<void>) => {
       void task().catch((error: unknown) => logActivity(errorMessage(error), "error"));
@@ -739,6 +767,7 @@ function App() {
     [logActivity],
   );
 
+  // Ask Chrome for permission before operating on a site.
   const ensureSiteAccess = useCallback(
     async (url: string) => {
       if (!isSupportedPageUrl(url)) {
@@ -766,6 +795,7 @@ function App() {
     [activeSiteAllowed, activeTab, allSitesAllowed],
   );
 
+  // Inspect the page and store its interactive elements.
   const inspectActivePage = useCallback(
     async (tabOverride?: TabInfo, accessChecked = false) => {
       const tab = tabOverride ?? activeTab;
@@ -792,6 +822,7 @@ function App() {
     [activeTab, ensureSiteAccess, logActivity],
   );
 
+  // Extract page text or links and show the result.
   const extract = useCallback(
     async (mode: "text" | "links") => {
       const tab = activeTab;
@@ -836,6 +867,7 @@ function App() {
     [activeTab, ensureSiteAccess, logActivity],
   );
 
+  // Poll the bridge status while the popup is open.
   useEffect(() => {
     let cancelled = false;
 
@@ -866,6 +898,7 @@ function App() {
     };
   }, [applyBridgeStatus]);
 
+  // Load permissions, the active tab, and the tab list on first render.
   useEffect(() => {
     let cancelled = false;
 
@@ -895,6 +928,7 @@ function App() {
     };
   }, [logActivity, refreshActiveTab, refreshTabs]);
 
+  // Keep the URL field in sync unless the user is editing it.
   useEffect(() => {
     if (document.activeElement?.id !== "navigate-url" && activeTab?.url) {
       setNavigateUrl(activeTab.url);
@@ -904,6 +938,7 @@ function App() {
   const canOperate = Boolean(activeTab?.url && isSupportedPageUrl(activeTab.url));
   const busy = inspecting || extracting !== null;
 
+  // Grant access to the active tab's site.
   const handleAllow = () => {
     run(async () => {
       const tab = activeTab;
@@ -920,6 +955,7 @@ function App() {
     });
   };
 
+  // Ask the service worker to reconnect to the MCP bridge.
   const handleRetry = () => {
     setReconnecting(true);
     logActivity("Reconnecting to the MCP bridge…");
@@ -936,6 +972,7 @@ function App() {
     });
   };
 
+  // Navigate the active tab to the URL in the form.
   const handleNavigate = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const tab = activeTab;
@@ -974,6 +1011,7 @@ function App() {
     });
   };
 
+  // Click an inspected element in the active tab.
   const handleElementClick = (element: InspectedElement) => {
     const tab = activeTab;
     if (!tab?.url) {
@@ -987,6 +1025,7 @@ function App() {
     });
   };
 
+  // Fill an inspected field in the active tab.
   const handleElementFill = (element: InspectedElement, text: string) => {
     const tab = activeTab;
     if (!tab?.url) {
@@ -1059,6 +1098,7 @@ function App() {
   );
 }
 
+// Mount the popup into its HTML root element.
 const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("The extension popup is missing its root element.");
 

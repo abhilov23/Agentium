@@ -1,3 +1,4 @@
+// MCP server: registers browser tools and forwards them to the extension bridge.
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
@@ -7,22 +8,25 @@ import { toAgentMessage } from "./errors.js";
 
 const extensionBridge = new ExtensionBridge();
 
+// Create the MCP server and describe its browser tools to the agent.
 export const server = new McpServer(
   {
-    name: "foundrylens-web-intelligence",
+    name: "Agentium-web-intelligence",
     version: "0.1.0",
   },
   {
     instructions:
-      "FoundryLens controls the user's real Chrome browser through the FoundryLens extension. Call browser_tabs first to see open tabs, then pass a tabId to the other tools; when tabId is omitted, the active tab is used. Use browser_open_tab to create a new tab, browser_switch_tab to focus an existing tab, and browser_close_tab to close one. Call browser_inspect before browser_click or browser_type to obtain element refs, which are valid only for the current page state. The extension can access normal http and https websites; Chrome-internal pages cannot be controlled. Use browser_extract to read text or links instead of requesting raw HTML.",
+      "Agentium controls the user's real Chrome browser through the FoundryLens extension. Call browser_tabs first to see open tabs, then pass a tabId to the other tools; when tabId is omitted, the active tab is used. Use browser_open_tab to create a new tab, browser_switch_tab to focus an existing tab, and browser_close_tab to close one. Call browser_inspect before browser_click or browser_type to obtain element refs, which are valid only for the current page state. The extension can access normal http and https websites; Chrome-internal pages cannot be controlled. Use browser_extract to read text or links instead of requesting raw HTML.",
   },
 );
 
+// Wrap a tool result as MCP text content.
 function textResult(value: unknown): CallToolResult {
   const text = typeof value === "string" ? value : (JSON.stringify(value) ?? String(value));
   return { content: [{ type: "text", text }] };
 }
 
+// Run a bridge request and turn any failure into an MCP error result.
 async function runTool(action: () => Promise<unknown>): Promise<CallToolResult> {
   try {
     return textResult(await action());
@@ -68,6 +72,7 @@ const maxItems = z
   .optional()
   .describe("Maximum links to return (default 100).");
 
+// Tab management tools.
 server.registerTool(
   "browser_tabs",
   {
@@ -116,6 +121,7 @@ server.registerTool(
     runTool(() => extensionBridge.request("CLOSE_TAB", { tabId: selectedTabId })),
 );
 
+// Page inspection and interaction tools.
 server.registerTool(
   "browser_inspect",
   {
@@ -171,6 +177,98 @@ server.registerTool(
 );
 
 server.registerTool(
+  "browser_back",
+  {
+    description: "Go backward in the current tab history.",
+    inputSchema: { tabId },
+  },
+  async ({ tabId: selectedTabId }) => runTool(() => extensionBridge.request("GO_BACK", { tabId: selectedTabId })),
+);
+
+server.registerTool(
+  "browser_forward",
+  {
+    description: "Go forward in the current tab history.",
+    inputSchema: { tabId },
+  },
+  async ({ tabId: selectedTabId }) => runTool(() => extensionBridge.request("GO_FORWARD", { tabId: selectedTabId })),
+);
+
+server.registerTool(
+  "browser_reload",
+  {
+    description: "Reload the page in the selected tab.",
+    inputSchema: { tabId },
+  },
+  async ({ tabId: selectedTabId }) => runTool(() => extensionBridge.request("RELOAD_TAB", { tabId: selectedTabId })),
+);
+
+server.registerTool(
+  "browser_stop_loading",
+  {
+    description: "Stop the current page from loading further.",
+    inputSchema: { tabId },
+  },
+  async ({ tabId: selectedTabId }) => runTool(() => extensionBridge.request("STOP_LOADING", { tabId: selectedTabId })),
+);
+
+server.registerTool(
+  "browser_navigation_state",
+  {
+    description: "Get the current URL, pending URL, title, and loading status for a tab.",
+    inputSchema: { tabId },
+  },
+  async ({ tabId: selectedTabId }) =>
+    runTool(() => extensionBridge.request("GET_NAVIGATION_STATE", { tabId: selectedTabId })),
+);
+
+server.registerTool(
+  "browser_scroll",
+  {
+    description: "Scroll the current page by a coordinate or in a direction.",
+    inputSchema: {
+      tabId,
+      x: z.number().int().optional().describe("Horizontal pixel offset to scroll to."),
+      y: z.number().int().optional().describe("Vertical pixel offset to scroll to."),
+      direction: z.enum(["top", "bottom", "up", "down", "left", "right"]).optional(),
+      behavior: z.enum(["auto", "smooth"]).optional(),
+    },
+  },
+  async ({ tabId: selectedTabId, x, y, direction, behavior }) =>
+    runTool(() => extensionBridge.request("SCROLL_PAGE", { tabId: selectedTabId, x, y, direction, behavior })),
+);
+
+server.registerTool(
+  "browser_hover",
+  {
+    description: "Hover the pointer over an element ref from browser_inspect.",
+    inputSchema: { tabId, ref },
+  },
+  async ({ tabId: selectedTabId, ref: elementRef }) =>
+    runTool(() => extensionBridge.request("HOVER_ELEMENT", { tabId: selectedTabId, ref: elementRef })),
+);
+
+server.registerTool(
+  "browser_screenshot",
+  {
+    description: "Capture the visible area of a tab as a PNG/JPEG data URL",
+    inputSchema: { tabId, fullPage: z.boolean().optional() },
+  },
+  async ({ tabId: selectedTabId, fullPage }) =>
+    runTool(() => extensionBridge.request("CAPTURE_SCREENSHOT", { tabId: selectedTabId, fullPage })),
+);
+
+server.registerTool(
+  "browser_get_cookies",
+  {
+    description: "List cookies for the selected tab's site.",
+    inputSchema: { tabId, url: z.string().url().max(2048).optional() },
+  },
+  async ({ tabId: selectedTabId, url }) =>
+    runTool(() => extensionBridge.request("GET_COOKIES", { tabId: selectedTabId, url })),
+);
+
+server.registerTool(
   "browser_extract",
   {
     description:
@@ -188,10 +286,12 @@ server.registerTool(
     ),
 );
 
+// Open the local WebSocket bridge used by the Chrome extension.
 export async function startServer(): Promise<void> {
   await extensionBridge.start();
 }
 
+// Close the WebSocket bridge during shutdown.
 export async function stopServer(): Promise<void> {
   await extensionBridge.stop();
 }

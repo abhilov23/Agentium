@@ -1,3 +1,4 @@
+// Reads readable text or links from the current page.
 import type { ExtractedLink, PageExtractionResult } from "../shared/types";
 
 export interface ExtractionOptions {
@@ -6,10 +7,12 @@ export interface ExtractionOptions {
   maxItems?: number | undefined;
 }
 
+// Extract page text or links based on the requested format.
 export function extractContent(options: ExtractionOptions): PageExtractionResult {
   return options.format === "links" ? extractLinks(options.maxItems ?? 100) : extractText(options.maxChars ?? 8000);
 }
 
+// Read the main text content of the page.
 function extractText(maxChars: number): PageExtractionResult {
   const root = document.querySelector("main, article") ?? document.body;
   if (!root) {
@@ -30,6 +33,7 @@ function extractText(maxChars: number): PageExtractionResult {
   };
 }
 
+// Collect unique http and https links from the page.
 function extractLinks(maxItems: number): PageExtractionResult {
   const seen = new Set<string>();
   const links: ExtractedLink[] = [];
