@@ -1,0 +1,25 @@
+{
+  "name": "@Agentium/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Chrome Manifest V3 extension that gives FoundryLens agent-friendly control of explicitly authorized tabs.",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch",
+    "check-types": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.7",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.9.3"
+  }
+}
