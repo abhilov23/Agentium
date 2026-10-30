@@ -163,6 +163,35 @@ server.registerTool(
 );
 
 server.registerTool(
+  "browser_upload_file",
+  {
+    description:
+      "Upload a file into a file-input element by sending the file as base64 content. Use a ref returned by browser_inspect on an <input type=file> element.",
+    inputSchema: {
+      tabId,
+      ref,
+      fileName: z.string().min(1).max(255).describe("Filename to set on the uploaded file."),
+      contentBase64: z
+        .string()
+        .min(1)
+        .max(5_000_000)
+        .describe("Base64-encoded file content to upload into the file input."),
+      mimeType: z.string().max(128).optional().describe("Optional MIME type, such as image/png."),
+    },
+  },
+  async ({ tabId: selectedTabId, ref: elementRef, fileName, contentBase64, mimeType }) =>
+    runTool(() =>
+      extensionBridge.request("UPLOAD_FILE", {
+        tabId: selectedTabId,
+        ref: elementRef,
+        fileName,
+        contentBase64,
+        mimeType,
+      }),
+    ),
+);
+
+server.registerTool(
   "browser_navigate",
   {
     description:

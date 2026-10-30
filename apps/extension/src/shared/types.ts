@@ -74,7 +74,9 @@ export interface PageInteractionResult {
 export interface InteractionResult extends PageInteractionResult {
   tabId: number;
   ref: string;
-  action: "click" | "type";
+  action: "click" | "type" | "upload";
+  filename?: string;
+  mimeType?: string;
 }
 
 // A link returned during page extraction.

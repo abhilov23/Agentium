@@ -45,6 +45,19 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     id: requestId,
+    action: z.literal("UPLOAD_FILE"),
+    payload: z
+      .object({
+        tabId,
+        ref: z.string().regex(/^e\d+$/),
+        fileName: z.string().min(1).max(255),
+        contentBase64: z.string().min(1).max(5_000_000),
+        mimeType: z.string().max(128).optional(),
+      })
+      .strict(),
+  }),
+  z.object({
+    id: requestId,
     action: z.literal("NAVIGATE"),
     payload: z.object({ tabId, url: z.string().url().max(2048) }).strict(),
   }),

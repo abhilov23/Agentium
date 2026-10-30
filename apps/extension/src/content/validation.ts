@@ -39,6 +39,18 @@ export function parsePageRequest(value: unknown): PageRequest | null {
         : { id, action, payload: { ref, text, submit } };
     }
 
+    case "UPLOAD_FILE": {
+      const ref = payload.ref;
+      const fileName = payload.fileName;
+      const contentBase64 = payload.contentBase64;
+      const mimeType = payload.mimeType;
+      if (typeof ref !== "string" || !REF_PATTERN.test(ref)) return null;
+      if (typeof fileName !== "string" || fileName.length === 0 || fileName.length > 255) return null;
+      if (typeof contentBase64 !== "string" || contentBase64.length === 0 || contentBase64.length > 5_000_000) return null;
+      if (mimeType !== undefined && (typeof mimeType !== "string" || mimeType.length > 128)) return null;
+      return { id, action, payload: { ref, fileName, contentBase64, ...(mimeType !== undefined ? { mimeType } : {}) } };
+    }
+
     case "WAIT_FOR_SELECTOR": {
       const selector = payload.selector;
       const timeoutMs = payload.timeoutMs;

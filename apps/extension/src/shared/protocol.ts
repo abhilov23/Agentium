@@ -110,6 +110,10 @@ export interface ExtensionActionMap {
     payload: { tabId?: number | undefined; ref: string; text: string; submit?: boolean | undefined };
     result: InteractionResult;
   };
+  UPLOAD_FILE: {
+    payload: { tabId?: number | undefined; ref: string; fileName: string; contentBase64: string; mimeType?: string | undefined };
+    result: InteractionResult;
+  };
   NAVIGATE: {
     payload: { tabId?: number | undefined; url: string };
     result: TabInfo;
@@ -135,6 +139,10 @@ export interface PageActionMap {
   TYPE_ELEMENT: {
     payload: { ref: string; text: string; submit?: boolean | undefined };
     result: PageInteractionResult;
+  };
+  UPLOAD_FILE: {
+    payload: { ref: string; fileName: string; contentBase64: string; mimeType?: string | undefined };
+    result: { url: string; title: string; filename?: string; mimeType?: string };
   };
   SCROLL_PAGE: {
     payload: { x?: number | undefined; y?: number | undefined; direction?: string | undefined; behavior?: "auto" | "smooth" | undefined };

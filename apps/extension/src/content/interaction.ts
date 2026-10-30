@@ -281,6 +281,39 @@ export function typeElement(
   return { url: location.href, title: document.title };
 }
 
+export function uploadFile(
+  registry: ElementRegistry,
+  ref: string,
+  fileName: string,
+  contentBase64: string,
+  mimeType?: string,
+): { url: string; title: string; filename?: string; mimeType?: string } {
+  const element = registry.resolve(ref);
+  if (!(element instanceof HTMLInputElement)) {
+    throw new Error(`Element ${ref} is not a file input.`);
+  }
+
+  if (element.type !== "file") {
+    throw new Error(`Element ${ref} is not a file input element.`);
+  }
+
+  if (!isVisible(element)) {
+    throw new Error(`Element ${ref} is not visible. Inspect the page again for visible elements.`);
+  }
+
+  const binary = Uint8Array.from(atob(contentBase64), (char) => char.charCodeAt(0));
+  const blob = new Blob([binary], { type: mimeType ?? "application/octet-stream" });
+  const resolvedType = mimeType ?? blob.type;
+  const file = new File([blob], fileName, { type: resolvedType || "application/octet-stream" });
+  const dataTransfer = new DataTransfer();
+  dataTransfer.items.add(file);
+  element.files = dataTransfer.files;
+  element.dispatchEvent(new Event("input", { bubbles: true }));
+  element.dispatchEvent(new Event("change", { bubbles: true }));
+
+  return { url: location.href, title: document.title, filename: file.name, mimeType: file.type };
+}
+
 // Submit the field's form when requested.
 function submitFrom(element: HTMLInputElement | HTMLTextAreaElement): void {
   if (element.form) {

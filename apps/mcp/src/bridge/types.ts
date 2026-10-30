@@ -133,6 +133,10 @@ export interface BridgeActionMap {
     payload: { tabId?: number | undefined; ref: string; text: string; submit?: boolean | undefined };
     result: InteractionResult;
   };
+  UPLOAD_FILE: {
+    payload: { tabId?: number | undefined; ref: string; fileName: string; contentBase64: string; mimeType?: string | undefined };
+    result: InteractionResult;
+  };
   NAVIGATE: {
     payload: { tabId?: number | undefined; url: string };
     result: TabInfo;

@@ -86,6 +86,26 @@ async function dispatch(request: ExtensionRequest): Promise<unknown> {
       return response;
     }
 
+    case "UPLOAD_FILE": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      const result = await sendPageRequest(tab.id, "UPLOAD_FILE", {
+        ref: request.payload.ref,
+        fileName: request.payload.fileName,
+        contentBase64: request.payload.contentBase64,
+        mimeType: request.payload.mimeType,
+      });
+      const response: ExtensionActionMap["UPLOAD_FILE"]["result"] = {
+        tabId: tab.id,
+        ref: request.payload.ref,
+        action: "upload",
+        url: result.url,
+        title: result.title,
+        ...(result.filename !== undefined ? { filename: result.filename } : {}),
+        ...(result.mimeType !== undefined ? { mimeType: result.mimeType } : {}),
+      };
+      return response;
+    }
+
     case "NAVIGATE": {
       const tab = await resolveTab(request.payload.tabId);
       return navigateTab(tab, request.payload.url);
