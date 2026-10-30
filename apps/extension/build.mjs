@@ -46,6 +46,7 @@ async function copyStaticFiles() {
     cp("src/popup/index.html", `${outdir}/popup/index.html`),
     cp("src/popup/popup.css", `${outdir}/popup/popup.css`),
     cp("src/popup/tokens.css", `${outdir}/popup/tokens.css`),
+    cp("src/popup/tokens-dark.css", `${outdir}/popup/tokens-dark.css`),
     cp("src/popup/base.css", `${outdir}/popup/base.css`),
     cp(
       "src/popup/Epilogue-latin.woff2",

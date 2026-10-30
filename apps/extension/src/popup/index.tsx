@@ -158,12 +158,12 @@ function IconShield() {
 
 function LogoMark() {
   return (
-    <svg viewBox="0 0 32 32" aria-hidden="true">
-      <rect className="mark-bg" x="1" y="1" width="30" height="30" rx="8" />
-      <circle className="mark-lens" cx="14" cy="14" r="6.2" />
-      <path className="mark-handle" d="M18.8 18.8 24 24" />
-      <circle className="mark-dot" cx="14" cy="14" r="1.5" />
-    </svg>
+    <img
+      src="../icons/agentium-32.png"
+      alt="Agentium"
+      style={{ width: 30, height: 30, display: "block" }}
+      aria-hidden="true"
+    />
   );
 }
 

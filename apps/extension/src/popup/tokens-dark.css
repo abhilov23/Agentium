@@ -1,0 +1,15 @@
+/* Dark-mode token overrides for Agentium popup. Conditionally imported. */
+:root {
+  --color-paper: oklch(11% 0.015 285);
+  --color-paper-2: oklch(15% 0.015 285);
+  --color-ink: oklch(96% 0.015 285);
+  --color-ink-2: oklch(72% 0.015 285);
+  --color-muted: oklch(55% 0.01 285);
+  --color-rule: oklch(24% 0.012 100);
+  --color-accent: oklch(62% 0.155 175);
+  --color-accent-ink: oklch(10% 0 0);
+  --color-accent-surface: oklch(18% 0.06 175);
+  --color-accent-surface-ink: oklch(100% 0 0);
+  --color-focus: oklch(62% 0.155 175);
+  --color-error: oklch(62% 0.2 28);
+}

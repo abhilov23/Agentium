@@ -5,19 +5,19 @@
   "description": "Browser-side adapter, It allows to Inspect and interact with pages you explicitly authorize.",
   "minimum_chrome_version": "116",
   "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/agentium-16.png",
+    "32": "icons/agentium-32.png",
+    "48": "icons/agentium-48.png",
+    "128": "icons/agentium-128.png"
   },
   "action": {
     "default_title": "Agentium",
     "default_popup": "popup/index.html",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icons/agentium-16.png",
+      "32": "icons/agentium-32.png",
+      "48": "icons/agentium-48.png",
+      "128": "icons/agentium-128.png"
     }
   },
   "background": {
