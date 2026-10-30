@@ -149,6 +149,10 @@ export interface BridgeActionMap {
     payload: { tabId?: number | undefined; fullPage?: boolean | undefined };
     result: { tabId: number; dataUrl: string; width: number; height: number };
   };
+  DOWNLOAD_FILE: {
+    payload: { tabId?: number | undefined; url: string; filename?: string | undefined; saveAs?: boolean | undefined };
+    result: { tabId: number; url: string; filename: string; downloadId: number };
+  };
   GET_COOKIES: {
     payload: { tabId?: number | undefined; url?: string | undefined };
     result: { tabId: number; url: string; cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number | null; secure: boolean; httpOnly: boolean; sameSite?: string | null }> };

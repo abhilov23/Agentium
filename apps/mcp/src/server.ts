@@ -259,6 +259,21 @@ server.registerTool(
 );
 
 server.registerTool(
+  "browser_download_file",
+  {
+    description: "Start a file download from an absolute http or https URL and return the Chrome download ID.",
+    inputSchema: {
+      tabId,
+      url: z.string().url().max(2048).describe("Absolute http or https URL to download."),
+      filename: z.string().min(1).max(255).optional().describe("Optional file name to save as."),
+      saveAs: z.boolean().optional().describe("Prompt the user to choose a save location."),
+    },
+  },
+  async ({ tabId: selectedTabId, url, filename, saveAs }) =>
+    runTool(() => extensionBridge.request("DOWNLOAD_FILE", { tabId: selectedTabId, url, filename, saveAs })),
+);
+
+server.registerTool(
   "browser_get_cookies",
   {
     description: "List cookies for the selected tab's site.",

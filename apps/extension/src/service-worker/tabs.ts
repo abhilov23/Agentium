@@ -269,6 +269,50 @@ export async function captureScreenshot(
   }
 }
 
+export async function downloadFile(
+  tabId?: number,
+  url?: string,
+  filename?: string,
+  saveAs = false,
+): Promise<{ tabId: number; url: string; filename: string; downloadId: number }> {
+  const tab = toTabInfo(await resolveTab(tabId));
+  const targetUrl = url ?? tab.url;
+
+  if (!targetUrl) {
+    throw new ExtensionError("A download URL is required.");
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(targetUrl);
+  } catch {
+    throw new ExtensionError("The download URL must be a valid absolute http or https URL.");
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new ExtensionError("Agentium can only download http or https files.");
+  }
+
+  try {
+    const finalFilename = filename ?? parsed.pathname.split("/").filter(Boolean).pop() ?? "download";
+    const downloadId = await chrome.downloads.download({
+      url: parsed.href,
+      filename: finalFilename,
+      saveAs,
+      conflictAction: "uniquify",
+    });
+
+    return {
+      tabId: tab.id,
+      url: parsed.href,
+      filename: finalFilename,
+      downloadId,
+    };
+  } catch (error) {
+    throw new ExtensionError(`Could not start the file download for tab ${tab.id}: ${errorMessage(error)}`);
+  }
+}
+
 export async function getCookies(
   tabId?: number,
   url?: string,

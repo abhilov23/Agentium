@@ -98,6 +98,18 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     id: requestId,
+    action: z.literal("DOWNLOAD_FILE"),
+    payload: z
+      .object({
+        tabId,
+        url: z.string().url().max(2048),
+        filename: z.string().min(1).max(255).optional(),
+        saveAs: z.boolean().optional(),
+      })
+      .strict(),
+  }),
+  z.object({
+    id: requestId,
     action: z.literal("GET_COOKIES"),
     payload: z.object({ tabId, url: z.string().url().max(2048).optional() }).strict(),
   }),

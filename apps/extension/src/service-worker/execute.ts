@@ -9,6 +9,7 @@ import { assertSiteAuthorized } from "./permissions";
 import {
   captureScreenshot,
   closeTab,
+  downloadFile,
   getActiveTabInfo,
   getCookies,
   getNavigationState,
@@ -130,6 +131,11 @@ async function dispatch(request: ExtensionRequest): Promise<unknown> {
     case "CAPTURE_SCREENSHOT": {
       const tab = await requireAuthorizedTab(request.payload.tabId);
       return captureScreenshot(tab.id, request.payload.fullPage);
+    }
+
+    case "DOWNLOAD_FILE": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      return downloadFile(tab.id, request.payload.url, request.payload.filename, request.payload.saveAs);
     }
 
     case "GET_COOKIES": {
