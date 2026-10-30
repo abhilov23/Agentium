@@ -299,6 +299,84 @@ export function handleDialog(
   };
 }
 
+export function fillForm(
+  fields: Array<{ selector: string; value: string; clear?: boolean | undefined; submit?: boolean | undefined }>,
+): { url: string; title: string; submitted: boolean; fieldCount: number } {
+  let submitted = false;
+  const processed = fields.map((field) => {
+    const node = document.querySelector(field.selector);
+    if (!node) {
+      throw new Error(`Selector not found: ${field.selector}`);
+    }
+    const element = node as HTMLElement;
+
+    if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) {
+      const value = field.clear ? "" : field.value;
+      if (element instanceof HTMLSelectElement) {
+        const option = Array.from(element.options).find((option) => option.value === value || option.text === value);
+        if (option) {
+          element.value = option.value;
+          element.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      } else {
+        const prototype = element instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype;
+        const setter = Object.getOwnPropertyDescriptor(prototype, "value")?.set;
+        if (setter) setter.call(element, value);
+        else element.value = value;
+        element.dispatchEvent(new Event("input", { bubbles: true }));
+        element.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    } else if (element.isContentEditable) {
+      element.textContent = field.value;
+      element.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: field.value }));
+    } else {
+      throw new Error(`Selector ${field.selector} is not a supported form field.`);
+    }
+
+    if (field.submit) {
+      const form = element.closest("form");
+      if (form instanceof HTMLFormElement) {
+        form.requestSubmit();
+        submitted = true;
+      } else {
+        element.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", bubbles: true }));
+        submitted = true;
+      }
+    }
+
+    return field;
+  });
+
+  return {
+    url: location.href,
+    title: document.title,
+    submitted,
+    fieldCount: processed.length,
+  };
+}
+
+export async function evaluateJs(script: string): Promise<{ url: string; title: string; result: unknown }> {
+  try {
+    // eslint-disable-next-line no-new-func
+    const value = await Function(`"use strict"; return (${script});`)();
+    const result =
+      typeof value === "string"
+        ? value
+        : typeof value === "undefined"
+          ? null
+          : (() => {
+              try {
+                return JSON.parse(JSON.stringify(value, (_key, item) => (typeof item === "bigint" ? item.toString() : item)));
+              } catch {
+                return String(value);
+              }
+            })();
+    return { url: location.href, title: document.title, result };
+  } catch (error) {
+    throw new Error(`Could not evaluate script: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
 export function uploadFile(
   registry: ElementRegistry,
   ref: string,

@@ -20,6 +20,7 @@ import {
   openTab,
   reloadTab,
   resolveTab,
+  setCookie,
   stopLoading,
   switchTab,
   toTabInfo,
@@ -96,6 +97,18 @@ async function dispatch(request: ExtensionRequest): Promise<unknown> {
       return { tabId: tab.id, ...result };
     }
 
+    case "FILL_FORM": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      const result = await sendPageRequest(tab.id, "FILL_FORM", { fields: request.payload.fields });
+      return { tabId: tab.id, ...result };
+    }
+
+    case "EVALUATE_JS": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      const result = await sendPageRequest(tab.id, "EVALUATE_JS", { script: request.payload.script });
+      return { tabId: tab.id, ...result };
+    }
+
     case "UPLOAD_FILE": {
       const tab = await requireAuthorizedTab(request.payload.tabId);
       const result = await sendPageRequest(tab.id, "UPLOAD_FILE", {
@@ -168,9 +181,49 @@ async function dispatch(request: ExtensionRequest): Promise<unknown> {
       return downloadFile(tab.id, request.payload.url, request.payload.filename, request.payload.saveAs);
     }
 
+    case "DOWNLOADS_LIST": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      const items = await chrome.downloads.search({
+        limit: request.payload.limit ?? 25,
+        orderBy: ["-startTime"],
+        ...(request.payload.state && request.payload.state !== "all" ? { state: request.payload.state as chrome.downloads.State } : {}),
+      });
+      return {
+        tabId: tab.id,
+        downloads: items.map((item) => ({
+          id: item.id,
+          url: item.url ?? "",
+          filename: item.filename ?? "",
+          state: item.state ?? "unknown",
+          totalBytes: item.totalBytes ?? 0,
+          bytesReceived: item.bytesReceived ?? 0,
+          danger: item.danger ?? "unknown",
+          mimeType: item.mime ?? "",
+          startedAt: item.startTime ? new Date(item.startTime).getTime() : null,
+          endTime: item.endTime ? new Date(item.endTime).getTime() : null,
+        })),
+      };
+    }
+
     case "GET_COOKIES": {
       const tab = await requireAuthorizedTab(request.payload.tabId);
       return getCookies(tab.id, request.payload.url ?? tab.url);
+    }
+
+    case "SET_COOKIE": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      const cookie = await setCookie(tab.id, {
+        url: request.payload.url,
+        name: request.payload.name,
+        value: request.payload.value,
+        ...(request.payload.domain !== undefined ? { domain: request.payload.domain } : {}),
+        ...(request.payload.path !== undefined ? { path: request.payload.path } : {}),
+        ...(request.payload.secure !== undefined ? { secure: request.payload.secure } : {}),
+        ...(request.payload.httpOnly !== undefined ? { httpOnly: request.payload.httpOnly } : {}),
+        ...(request.payload.sameSite !== undefined ? { sameSite: request.payload.sameSite } : {}),
+        ...(request.payload.expirationDate !== undefined ? { expirationDate: request.payload.expirationDate } : {}),
+      });
+      return { tabId: tab.id, url: request.payload.url, cookie };
     }
 
     case "WAIT_FOR_SELECTOR": {

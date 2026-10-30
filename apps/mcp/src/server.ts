@@ -179,6 +179,77 @@ server.registerTool(
 );
 
 server.registerTool(
+  "browser_fill_form",
+  {
+    description: "Fill a form by setting multiple CSS selectors to specific values, optionally submitting the form after the last field.",
+    inputSchema: {
+      tabId,
+      fields: z
+        .array(
+          z.object({
+            selector: z.string().min(1).max(2048).describe("CSS selector for the field to fill."),
+            value: z.string().max(20_000).describe("Value to enter into the field."),
+            clear: z.boolean().optional().describe("Clear the field before setting the value."),
+            submit: z.boolean().optional().describe("Submit the form after this field is filled."),
+          }),
+        )
+        .min(1)
+        .max(50)
+        .describe("Fields to fill in order."),
+    },
+  },
+  async ({ tabId: selectedTabId, fields }) =>
+    runTool(() => extensionBridge.request("FILL_FORM", { tabId: selectedTabId, fields })),
+);
+
+server.registerTool(
+  "browser_evaluate_js",
+  {
+    description: "Execute JavaScript in the current page context and return the evaluated value as JSON-safe data.",
+    inputSchema: {
+      tabId,
+      script: z.string().min(1).max(50_000).describe("JavaScript source to evaluate in the page context."),
+    },
+  },
+  async ({ tabId: selectedTabId, script }) =>
+    runTool(() => extensionBridge.request("EVALUATE_JS", { tabId: selectedTabId, script })),
+);
+
+server.registerTool(
+  "browser_set_cookie",
+  {
+    description: "Set a browser cookie for a given site URL.",
+    inputSchema: {
+      tabId,
+      url: z.string().url().max(2048).describe("Site URL the cookie belongs to."),
+      name: z.string().min(1).max(256).describe("Cookie name."),
+      value: z.string().max(4096).describe("Cookie value."),
+      path: z.string().max(2048).optional().describe("Cookie path."),
+      domain: z.string().max(256).optional().describe("Cookie domain."),
+      secure: z.boolean().optional().describe("Mark the cookie as secure."),
+      httpOnly: z.boolean().optional().describe("Mark the cookie as httpOnly."),
+      sameSite: z.enum(["strict", "lax", "none"]).optional().describe("SameSite policy."),
+      expirationDate: z.number().finite().optional().describe("Unix timestamp for cookie expiry."),
+    },
+  },
+  async ({ tabId: selectedTabId, url, name, value, path, domain, secure, httpOnly, sameSite, expirationDate }) =>
+    runTool(() =>
+      extensionBridge.request("SET_COOKIE", {
+        tabId: selectedTabId,
+        url,
+        name,
+        value,
+        path,
+        domain,
+        secure,
+        httpOnly,
+        sameSite,
+        expirationDate,
+      }),
+    ),
+);
+
+server.registerTool(
   "browser_upload_file",
   {
     description:
@@ -316,6 +387,20 @@ server.registerTool(
   },
   async ({ tabId: selectedTabId, url, filename, saveAs }) =>
     runTool(() => extensionBridge.request("DOWNLOAD_FILE", { tabId: selectedTabId, url, filename, saveAs })),
+);
+
+server.registerTool(
+  "browser_downloads_list",
+  {
+    description: "List recent Chrome downloads with metadata such as filename, bytes received, and state.",
+    inputSchema: {
+      tabId,
+      limit: z.number().int().min(1).max(100).optional().describe("Maximum number of downloads to return."),
+      state: z.enum(["all", "in_progress", "complete", "cancelled"]).optional().describe("Filter by download state."),
+    },
+  },
+  async ({ tabId: selectedTabId, limit, state }) =>
+    runTool(() => extensionBridge.request("DOWNLOADS_LIST", { tabId: selectedTabId, limit, state })),
 );
 
 server.registerTool(

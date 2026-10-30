@@ -57,6 +57,28 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     id: requestId,
+    action: z.literal("FILL_FORM"),
+    payload: z
+      .object({
+        tabId,
+        fields: z.array(
+          z.object({
+            selector: z.string().min(1).max(2048),
+            value: z.string().max(20_000),
+            clear: z.boolean().optional(),
+            submit: z.boolean().optional(),
+          }),
+        ),
+      })
+      .strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("EVALUATE_JS"),
+    payload: z.object({ tabId, script: z.string().min(1).max(50_000) }).strict(),
+  }),
+  z.object({
+    id: requestId,
     action: z.literal("UPLOAD_FILE"),
     payload: z
       .object({
@@ -135,8 +157,37 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     id: requestId,
+    action: z.literal("DOWNLOADS_LIST"),
+    payload: z
+      .object({
+        tabId,
+        limit: boundedInteger(1, 100).optional(),
+        state: z.enum(["all", "in_progress", "complete", "cancelled"]).optional(),
+      })
+      .strict(),
+  }),
+  z.object({
+    id: requestId,
     action: z.literal("GET_COOKIES"),
     payload: z.object({ tabId, url: z.string().url().max(2048).optional() }).strict(),
+  }),
+  z.object({
+    id: requestId,
+    action: z.literal("SET_COOKIE"),
+    payload: z
+      .object({
+        tabId,
+        url: z.string().url().max(2048),
+        name: z.string().min(1).max(256),
+        value: z.string().max(4096),
+        path: z.string().max(2048).optional(),
+        domain: z.string().max(256).optional(),
+        secure: z.boolean().optional(),
+        httpOnly: z.boolean().optional(),
+        sameSite: z.enum(["strict", "lax", "none"]).optional(),
+        expirationDate: z.number().finite().optional(),
+      })
+      .strict(),
   }),
   z.object({
     id: requestId,

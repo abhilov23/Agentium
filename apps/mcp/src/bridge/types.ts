@@ -83,6 +83,14 @@ export type EmptyPayload = Record<never, never>;
 // Every action the MCP server can send to the extension.
 export interface BridgeActionMap {
   LIST_TABS: { payload: EmptyPayload; result: TabInfo[] };
+  FILL_FORM: {
+    payload: { tabId?: number | undefined; fields: Array<{ selector: string; value: string; clear?: boolean | undefined; submit?: boolean | undefined }> };
+    result: { tabId: number; url: string; title: string; submitted: boolean; fieldCount: number };
+  };
+  EVALUATE_JS: {
+    payload: { tabId?: number | undefined; script: string };
+    result: { tabId: number; url: string; title: string; result: unknown };
+  };
   OPEN_TAB: {
     payload: { url: string; active?: boolean | undefined };
     result: TabInfo;
@@ -161,9 +169,17 @@ export interface BridgeActionMap {
     payload: { tabId?: number | undefined; url: string; filename?: string | undefined; saveAs?: boolean | undefined };
     result: { tabId: number; url: string; filename: string; downloadId: number };
   };
+  DOWNLOADS_LIST: {
+    payload: { tabId?: number | undefined; limit?: number | undefined; state?: "all" | "in_progress" | "complete" | "cancelled" | undefined };
+    result: { tabId: number; downloads: Array<{ id: number; url: string; filename: string; state: string; totalBytes: number; bytesReceived: number; danger: string; mimeType: string; startedAt: number | null; endTime: number | null }> };
+  };
   GET_COOKIES: {
     payload: { tabId?: number | undefined; url?: string | undefined };
     result: { tabId: number; url: string; cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number | null; secure: boolean; httpOnly: boolean; sameSite?: string | null }> };
+  };
+  SET_COOKIE: {
+    payload: { tabId?: number | undefined; url: string; name: string; value: string; path?: string | undefined; domain?: string | undefined; secure?: boolean | undefined; httpOnly?: boolean | undefined; sameSite?: "strict" | "lax" | "none" | undefined; expirationDate?: number | undefined };
+    result: { tabId: number; url: string; cookie: { name: string; value: string; domain: string; path: string; secure: boolean; httpOnly: boolean; sameSite?: string | null; expirationDate?: number | null } };
   };
   WAIT_FOR_SELECTOR: {
     payload: { tabId?: number | undefined; selector: string; timeoutMs?: number | undefined; visibleOnly?: boolean | undefined };

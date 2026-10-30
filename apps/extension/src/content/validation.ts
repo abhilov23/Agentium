@@ -57,6 +57,31 @@ export function parsePageRequest(value: unknown): PageRequest | null {
       };
     }
 
+    case "FILL_FORM": {
+      const fields = payload.fields;
+      if (!Array.isArray(fields) || fields.length === 0 || fields.length > 50) return null;
+      const parsedFields: Array<{ selector: string; value: string; clear?: boolean; submit?: boolean }> = [];
+      for (const field of fields) {
+        if (!isRecord(field)) return null;
+        const selector = field.selector;
+        const value = field.value;
+        const clear = field.clear;
+        const submit = field.submit;
+        if (typeof selector !== "string" || selector.length === 0 || selector.length > 2048) return null;
+        if (typeof value !== "string" || value.length > 20_000) return null;
+        if (clear !== undefined && typeof clear !== "boolean") return null;
+        if (submit !== undefined && typeof submit !== "boolean") return null;
+        parsedFields.push({ selector, value, ...(clear !== undefined ? { clear } : {}), ...(submit !== undefined ? { submit } : {}) });
+      }
+      return { id, action, payload: { fields: parsedFields } };
+    }
+
+    case "EVALUATE_JS": {
+      const script = payload.script;
+      if (typeof script !== "string" || script.length === 0 || script.length > 50_000) return null;
+      return { id, action, payload: { script } };
+    }
+
     case "UPLOAD_FILE": {
       const ref = payload.ref;
       const fileName = payload.fileName;

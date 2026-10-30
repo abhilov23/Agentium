@@ -74,9 +74,17 @@ export interface ExtensionActionMap {
     payload: { tabId?: number | undefined; url: string; filename?: string | undefined; saveAs?: boolean | undefined };
     result: { tabId: number; url: string; filename: string; downloadId: number };
   };
+  DOWNLOADS_LIST: {
+    payload: { tabId?: number | undefined; limit?: number | undefined; state?: "all" | "in_progress" | "complete" | "cancelled" | undefined };
+    result: { tabId: number; downloads: Array<{ id: number; url: string; filename: string; state: string; totalBytes: number; bytesReceived: number; danger: string; mimeType: string; startedAt: number | null; endTime: number | null }> };
+  };
   GET_COOKIES: {
     payload: { tabId?: number | undefined; url?: string | undefined };
     result: { tabId: number; url: string; cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number | null; secure: boolean; httpOnly: boolean; sameSite?: string | null }> };
+  };
+  SET_COOKIE: {
+    payload: { tabId?: number | undefined; url: string; name: string; value: string; path?: string | undefined; domain?: string | undefined; secure?: boolean | undefined; httpOnly?: boolean | undefined; sameSite?: "strict" | "lax" | "none" | undefined; expirationDate?: number | undefined };
+    result: { tabId: number; url: string; cookie: { name: string; value: string; domain: string; path: string; secure: boolean; httpOnly: boolean; sameSite?: string | null; expirationDate?: number | null } };
   };
   WAIT_FOR_URL: {
     payload: { tabId?: number | undefined; pattern: string; timeoutMs?: number | undefined };
@@ -147,6 +155,14 @@ export interface PageActionMap {
   HANDLE_DIALOG: {
     payload: { type: "alert" | "confirm" | "prompt"; accept?: boolean | undefined; promptText?: string | undefined };
     result: { type: "alert" | "confirm" | "prompt"; accepted: boolean; value: string | null; url: string; title: string };
+  };
+  FILL_FORM: {
+    payload: { fields: Array<{ selector: string; value: string; clear?: boolean | undefined; submit?: boolean | undefined }> };
+    result: { url: string; title: string; submitted: boolean; fieldCount: number };
+  };
+  EVALUATE_JS: {
+    payload: { script: string };
+    result: { url: string; title: string; result: unknown };
   };
   UPLOAD_FILE: {
     payload: { ref: string; fileName: string; contentBase64: string; mimeType?: string | undefined };

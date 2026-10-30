@@ -4,7 +4,7 @@ import type { PageRequest, ResponseEnvelope } from "../shared/protocol";
 import { requestIdOf } from "../shared/request-id";
 import { extractContent } from "./extraction";
 import { inspectPage } from "./inspection";
-import { clickElement, findText, getPageState, handleDialog, hoverElement, scrollPage, typeElement, uploadFile, waitForNetworkIdle, waitForSelector } from "./interaction";
+import { clickElement, evaluateJs, fillForm, findText, getPageState, handleDialog, hoverElement, scrollPage, typeElement, uploadFile, waitForNetworkIdle, waitForSelector } from "./interaction";
 import { ElementRegistry } from "./refs";
 import { parsePageRequest } from "./validation";
 
@@ -29,6 +29,10 @@ function handleRequest(request: PageRequest): unknown {
       return typeElement(registry, request.payload.ref, request.payload.text, request.payload.submit);
     case "HANDLE_DIALOG":
       return handleDialog(request.payload.type, request.payload.accept, request.payload.promptText);
+    case "FILL_FORM":
+      return fillForm(request.payload.fields);
+    case "EVALUATE_JS":
+      return evaluateJs(request.payload.script);
     case "UPLOAD_FILE":
       return uploadFile(registry, request.payload.ref, request.payload.fileName, request.payload.contentBase64, request.payload.mimeType);
     case "SCROLL_PAGE":

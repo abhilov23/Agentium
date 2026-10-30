@@ -313,6 +313,53 @@ export async function downloadFile(
   }
 }
 
+export async function setCookie(
+  tabId: number | undefined,
+  details: {
+    url: string;
+    name: string;
+    value: string;
+    path?: string | undefined;
+    domain?: string | undefined;
+    secure?: boolean | undefined;
+    httpOnly?: boolean | undefined;
+    sameSite?: "strict" | "lax" | "none" | undefined;
+    expirationDate?: number | undefined;
+  },
+): Promise<{ name: string; value: string; domain: string; path: string; secure: boolean; httpOnly: boolean; sameSite?: string | null; expirationDate?: number | null }> {
+  const tab = toTabInfo(await resolveTab(tabId));
+  try {
+    const cookie = await chrome.cookies.set({
+      url: details.url,
+      name: details.name,
+      value: details.value,
+      ...(details.path !== undefined ? { path: details.path } : {}),
+      ...(details.domain !== undefined ? { domain: details.domain } : {}),
+      ...(details.secure !== undefined ? { secure: details.secure } : {}),
+      ...(details.httpOnly !== undefined ? { httpOnly: details.httpOnly } : {}),
+      ...(details.sameSite !== undefined ? { sameSite: details.sameSite === "none" ? "no_restriction" : details.sameSite } : {}),
+      ...(details.expirationDate !== undefined ? { expirationDate: details.expirationDate } : {}),
+    });
+
+    if (!cookie) {
+      throw new ExtensionError(`Could not set cookie ${details.name} for ${details.url}.`);
+    }
+
+    return {
+      name: cookie.name,
+      value: cookie.value,
+      domain: cookie.domain,
+      path: cookie.path,
+      secure: cookie.secure,
+      httpOnly: cookie.httpOnly,
+      sameSite: cookie.sameSite ?? null,
+      expirationDate: typeof cookie.expirationDate === "number" ? cookie.expirationDate : null,
+    };
+  } catch (error) {
+    throw new ExtensionError(`Could not set cookie ${details.name} for tab ${tab.id}: ${errorMessage(error)}`);
+  }
+}
+
 export async function getCookies(
   tabId?: number,
   url?: string,
