@@ -1,5 +1,6 @@
 <img width="2800" height="560" alt="agentium-hero-banner" src="https://github.com/user-attachments/assets/1dbb0115-b12d-4907-b619-0e7c34146187" />
 # Agentium
+<img width="2800" height="560" alt="agentium-hero-banner (1)" src="https://github.com/user-attachments/assets/8f590695-103a-49e8-b292-96ad59923a08" />
 
 **Local Chrome automation for AI assistants over the Model Context Protocol.**
 
