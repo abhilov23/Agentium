@@ -6,6 +6,7 @@ import { extensionRequestSchema } from "../shared/schemas";
 import type { TabInfo } from "../shared/types";
 import { sendPageRequest } from "./page-bridge";
 import { assertSiteAuthorized } from "./permissions";
+import { dispatchTrustedClick } from "./trusted-click";
 import {
   captureScreenshot,
   closeTab,
@@ -61,12 +62,15 @@ async function dispatch(request: ExtensionRequest): Promise<unknown> {
 
     case "CLICK_ELEMENT": {
       const tab = await requireAuthorizedTab(request.payload.tabId);
-      const result = await sendPageRequest(tab.id, "CLICK_ELEMENT", { ref: request.payload.ref });
+      const target = await sendPageRequest(tab.id, "PREPARE_CLICK", { ref: request.payload.ref });
+      await dispatchTrustedClick(tab.id, target.x, target.y);
+      const currentTab = await chrome.tabs.get(tab.id).catch(() => null);
       const response: ExtensionActionMap["CLICK_ELEMENT"]["result"] = {
         tabId: tab.id,
         ref: request.payload.ref,
         action: "click",
-        ...result,
+        url: currentTab?.pendingUrl ?? currentTab?.url ?? target.url,
+        title: currentTab?.title ?? target.title,
       };
       return response;
     }

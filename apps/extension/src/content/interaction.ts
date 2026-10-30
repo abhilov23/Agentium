@@ -1,5 +1,5 @@
 // Clicks, fills, scrolls, and hovers elements in the current page.
-import type { PageInteractionResult } from "../shared/types";
+import type { PageClickTarget, PageInteractionResult } from "../shared/types";
 import { isVisible } from "./dom";
 import type { ElementRegistry } from "./refs";
 
@@ -12,7 +12,7 @@ function isDisabled(element: Element): boolean {
 }
 
 // Click an element by its inspected ref.
-export function clickElement(registry: ElementRegistry, ref: string): PageInteractionResult {
+export function prepareElementClick(registry: ElementRegistry, ref: string): PageClickTarget {
   const element = registry.resolve(ref);
   if (!isVisible(element)) {
     throw new Error(`Element ${ref} is not visible. Inspect the page again for visible elements.`);
@@ -22,13 +22,14 @@ export function clickElement(registry: ElementRegistry, ref: string): PageIntera
   }
 
   element.scrollIntoView({ block: "center", inline: "center" });
-  if (element instanceof HTMLElement) {
-    element.click();
-  } else {
-    element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window }));
-  }
+  const rect = element.getBoundingClientRect();
 
-  return { url: location.href, title: document.title };
+  return {
+    x: rect.left + rect.width / 2,
+    y: rect.top + rect.height / 2,
+    url: location.href,
+    title: document.title,
+  };
 }
 
 export function scrollPage(payload: {

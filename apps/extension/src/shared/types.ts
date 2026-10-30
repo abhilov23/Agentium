@@ -70,6 +70,13 @@ export interface PageInteractionResult {
   title: string;
 }
 
+export interface PageClickTarget {
+  x: number;
+  y: number;
+  url: string;
+  title: string;
+}
+
 // Interaction result with the tab id and action details added.
 export interface InteractionResult extends PageInteractionResult {
   tabId: number;

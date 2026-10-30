@@ -45,6 +45,12 @@ async function copyStaticFiles() {
     cp("src/icons", `${outdir}/icons`, { recursive: true }),
     cp("src/popup/index.html", `${outdir}/popup/index.html`),
     cp("src/popup/popup.css", `${outdir}/popup/popup.css`),
+    cp("src/popup/tokens.css", `${outdir}/popup/tokens.css`),
+    cp("src/popup/base.css", `${outdir}/popup/base.css`),
+    cp(
+      "src/popup/Epilogue-latin.woff2",
+      `${outdir}/popup/Epilogue-latin.woff2`,
+    ),
   ]);
 }
 
@@ -57,7 +63,9 @@ async function main() {
 
   if (watch) {
     await Promise.all(contexts.map((buildContext) => buildContext.watch()));
-    console.log("Watching extension sources. Reload the extension after changes.");
+    console.log(
+      "Watching extension sources. Reload the extension after changes.",
+    );
     return;
   }
 

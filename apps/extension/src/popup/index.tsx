@@ -44,7 +44,9 @@ function normalizeUrl(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) throw new Error("Enter a URL to navigate to.");
 
-  const candidate = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  const candidate = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : `https://${trimmed}`;
   let url: URL;
   try {
     url = new URL(candidate);
@@ -72,9 +74,14 @@ function bridgeDetail(status: BridgeStatus): string {
     return "Waiting for the local MCP bridge to accept the connection.";
   }
   const retrySeconds =
-    status.nextRetryAt === null ? null : Math.max(0, Math.ceil((status.nextRetryAt - Date.now()) / 1000));
-  const base = status.lastError ?? "Start the Agentium Web MCP server, then retry.";
-  return retrySeconds !== null && retrySeconds > 0 ? `${base} Retrying in ${retrySeconds}s.` : base;
+    status.nextRetryAt === null
+      ? null
+      : Math.max(0, Math.ceil((status.nextRetryAt - Date.now()) / 1000));
+  const base =
+    status.lastError ?? "Start the Agentium Web MCP server, then retry.";
+  return retrySeconds !== null && retrySeconds > 0
+    ? `${base} Retrying in ${retrySeconds}s.`
+    : base;
 }
 
 // Inline SVG icons used by the popup.
@@ -152,16 +159,10 @@ function IconShield() {
 function LogoMark() {
   return (
     <svg viewBox="0 0 32 32" aria-hidden="true">
-      <rect x="1" y="1" width="30" height="30" rx="9" fill="currentColor" />
-      <circle cx="14" cy="14" r="6.2" fill="none" stroke="#f7f4ea" strokeWidth="2.4" />
-      <path
-        d="M18.8 18.8 24 24"
-        fill="none"
-        stroke="#f7f4ea"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <circle cx="14" cy="14" r="1.5" fill="#92dfc7" />
+      <rect className="mark-bg" x="1" y="1" width="30" height="30" rx="8" />
+      <circle className="mark-lens" cx="14" cy="14" r="6.2" />
+      <path className="mark-handle" d="M18.8 18.8 24 24" />
+      <circle className="mark-dot" cx="14" cy="14" r="1.5" />
     </svg>
   );
 }
@@ -209,7 +210,11 @@ function BridgeBanner({
         <IconShield />
       </span>
       <div className="banner-copy">
-        <strong>{status.state === "connecting" ? "Connecting to MCP bridge" : "MCP bridge is offline"}</strong>
+        <strong>
+          {status.state === "connecting"
+            ? "Connecting to MCP bridge"
+            : "MCP bridge is offline"}
+        </strong>
         <p>{bridgeDetail(status)}</p>
         <code>{status.url || BRIDGE_WEBSOCKET_URL}</code>
       </div>
@@ -264,11 +269,16 @@ function ActiveCard({
           : "Unsupported";
 
   return (
-    <section className="card hero-card">
+    <section className="workspace" aria-label="Active tab">
       <div className="section-head">
         <div className="section-title">
-          <p className="eyebrow">Active tab</p>
-          <h2>{loading ? "Reading current tab…" : activeTab ? titleOf(activeTab) : "No active tab"}</h2>
+          <h2>
+            {loading
+              ? "Reading current tab…"
+              : activeTab
+                ? titleOf(activeTab)
+                : "No active tab"}
+          </h2>
         </div>
         <span className="chip" data-state={loading ? "unknown" : siteState}>
           {siteLabel}
@@ -285,7 +295,10 @@ function ActiveCard({
 
       <div className="meta-row">
         {activeTab ? <span className="tab-id">Tab #{activeTab.id}</span> : null}
-        {activeTab && canOperate && !allSitesAllowed && siteState !== "allowed" ? (
+        {activeTab &&
+        canOperate &&
+        !allSitesAllowed &&
+        siteState !== "allowed" ? (
           <button type="button" className="text-button" onClick={onAllow}>
             <IconLock />
             Grant site access
@@ -300,15 +313,33 @@ function ActiveCard({
       </div>
 
       <div className="quick-actions">
-        <button type="button" className="button button-primary" onClick={onInspect} disabled={!canOperate || busy}>
+        <button
+          type="button"
+          className="button button-primary"
+          onClick={onInspect}
+          disabled={!canOperate || busy}
+          aria-busy={inspecting}
+        >
           <IconInspect />
           {inspecting ? "Inspecting…" : "Inspect"}
         </button>
-        <button type="button" className="button" onClick={() => onExtract("text")} disabled={!canOperate || busy}>
+        <button
+          type="button"
+          className="button"
+          onClick={() => onExtract("text")}
+          disabled={!canOperate || busy}
+          aria-busy={extracting === "text"}
+        >
           <IconText />
           {extracting === "text" ? "Reading…" : "Text"}
         </button>
-        <button type="button" className="button" onClick={() => onExtract("links")} disabled={!canOperate || busy}>
+        <button
+          type="button"
+          className="button"
+          onClick={() => onExtract("links")}
+          disabled={!canOperate || busy}
+          aria-busy={extracting === "links"}
+        >
           <IconLinks />
           {extracting === "links" ? "Reading…" : "Links"}
         </button>
@@ -330,10 +361,10 @@ function NavigateCard({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <section className="card navigate-card">
+    <section className="navigate-strip" aria-label="Navigate this tab">
       <form onSubmit={onSubmit}>
         <div className="command-head">
-          <label htmlFor="navigate-url" className="eyebrow">
+          <label htmlFor="navigate-url" className="field-label">
             Navigate this tab
           </label>
           <span className="command-hint">Enter to open</span>
@@ -350,7 +381,7 @@ function NavigateCard({
             spellCheck={false}
             disabled={disabled}
           />
-          <button type="submit" className="button button-primary" disabled={disabled}>
+          <button type="submit" className="button" disabled={disabled}>
             Open
           </button>
         </div>
@@ -370,17 +401,28 @@ function ResultCard({
   onClose: () => void;
 }) {
   return (
-    <section className="card result-card">
+    <section className="result-panel" aria-label="Result">
       <div className="section-head">
         <div className="section-title">
-          <p className="eyebrow">Result</p>
           <h2>{result.title}</h2>
         </div>
         <div className="head-actions">
-          <button type="button" className="icon-button" onClick={onCopy} title="Copy result" aria-label="Copy result">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onCopy}
+            title="Copy result"
+            aria-label="Copy result"
+          >
             <IconCopy />
           </button>
-          <button type="button" className="icon-button" onClick={onClose} title="Close result" aria-label="Close result">
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onClose}
+            title="Close result"
+            aria-label="Close result"
+          >
             <IconClose />
           </button>
         </div>
@@ -402,7 +444,10 @@ function ElementRow({
 }) {
   const [value, setValue] = useState("");
   const disabled = element.disabled === true;
-  const canFill = element.kind === "input" || element.kind === "textarea" || element.kind === "editable";
+  const canFill =
+    element.kind === "input" ||
+    element.kind === "textarea" ||
+    element.kind === "editable";
   const name = element.name || element.placeholder || "(no accessible name)";
   const hint = element.placeholder
     ? `Placeholder: ${element.placeholder}`
@@ -483,10 +528,9 @@ function ElementsCard({
       : "Not inspected";
 
   return (
-    <section className="card">
+    <section className="ledger" aria-label="Interactive elements">
       <div className="section-head">
         <div className="section-title">
-          <p className="eyebrow">Page</p>
           <h2>Interactive elements</h2>
         </div>
         <span className="muted">{summary}</span>
@@ -495,7 +539,12 @@ function ElementsCard({
       {elements.length > 0 ? (
         <ul className="element-list">
           {elements.map((element) => (
-            <ElementRow key={element.ref} element={element} onClick={onClick} onFill={onFill} />
+            <ElementRow
+              key={element.ref}
+              element={element}
+              onClick={onClick}
+              onFill={onFill}
+            />
           ))}
         </ul>
       ) : (
@@ -503,7 +552,11 @@ function ElementsCard({
           <span className="empty-icon" aria-hidden="true">
             <IconInspect />
           </span>
-          <p>{inspecting ? "Looking for buttons, inputs, and links…" : "Inspect the page to see what you can interact with."}</p>
+          <p>
+            {inspecting
+              ? "Looking for buttons, inputs, and links…"
+              : "Inspect the page to see what you can interact with."}
+          </p>
         </div>
       )}
     </section>
@@ -543,17 +596,20 @@ function App() {
   const previousBridgeState = useRef<BridgeConnectionState | null>(null);
 
   // Keep action feedback in the console rather than in a noisy popup queue.
-  const logActivity = useCallback((message: string, tone: ActivityTone = "info") => {
-    if (tone === "error") {
-      console.error(message);
-      return;
-    }
-    if (tone === "success") {
-      console.info(message);
-      return;
-    }
-    console.log(message);
-  }, []);
+  const logActivity = useCallback(
+    (message: string, tone: ActivityTone = "info") => {
+      if (tone === "error") {
+        console.error(message);
+        return;
+      }
+      if (tone === "success") {
+        console.info(message);
+        return;
+      }
+      console.log(message);
+    },
+    [],
+  );
 
   // Update bridge state and log meaningful connection changes.
   const applyBridgeStatus = useCallback(
@@ -567,7 +623,10 @@ function App() {
         if (status.state === "connected") {
           logActivity("MCP bridge connected.", "success");
         } else if (status.state === "disconnected") {
-          logActivity("MCP bridge offline. Start the MCP server, then click Retry.", "error");
+          logActivity(
+            "MCP bridge offline. Start the MCP server, then click Retry.",
+            "error",
+          );
         }
         return;
       }
@@ -576,7 +635,10 @@ function App() {
       if (status.state === "connected") {
         logActivity("MCP bridge connected.", "success");
       } else if (previous === "connected" && status.state === "disconnected") {
-        logActivity("MCP bridge disconnected. Retrying automatically.", "error");
+        logActivity(
+          "MCP bridge disconnected. Retrying automatically.",
+          "error",
+        );
       }
     },
     [logActivity],
@@ -602,7 +664,9 @@ function App() {
 
       let allowed = false;
       try {
-        allowed = await chrome.permissions.contains({ origins: [originPattern(tab.url)] });
+        allowed = await chrome.permissions.contains({
+          origins: [originPattern(tab.url)],
+        });
       } catch {
         allowed = false;
       }
@@ -618,7 +682,9 @@ function App() {
   // Run an async action and log any failure.
   const run = useCallback(
     (task: () => Promise<void>) => {
-      void task().catch((error: unknown) => logActivity(errorMessage(error), "error"));
+      void task().catch((error: unknown) =>
+        logActivity(errorMessage(error), "error"),
+      );
     },
     [logActivity],
   );
@@ -634,13 +700,18 @@ function App() {
 
       const origin = new URL(url).origin;
       const currentUrl = activeTab?.url ?? "";
-      const sameOrigin = isSupportedPageUrl(currentUrl) && new URL(currentUrl).origin === origin;
+      const sameOrigin =
+        isSupportedPageUrl(currentUrl) && new URL(currentUrl).origin === origin;
 
       if (sameOrigin && activeSiteAllowed) return;
 
-      const granted = await chrome.permissions.request({ origins: [originPattern(url)] });
+      const granted = await chrome.permissions.request({
+        origins: [originPattern(url)],
+      });
       if (!granted) {
-        throw new Error(`Access to ${origin} was not granted. Allow this site before running page actions.`);
+        throw new Error(
+          `Access to ${origin} was not granted. Allow this site before running page actions.`,
+        );
       }
 
       if (sameOrigin) {
@@ -656,21 +727,29 @@ function App() {
     async (tabOverride?: TabInfo, accessChecked = false) => {
       const tab = tabOverride ?? activeTab;
       if (!tab?.url) {
-        throw new Error("No active tab is available. Focus a normal tab and reopen the popup.");
+        throw new Error(
+          "No active tab is available. Focus a normal tab and reopen the popup.",
+        );
       }
 
       if (!accessChecked) await ensureSiteAccess(tab.url);
 
       setInspecting(true);
       try {
-        const inspection = await sendRequest("INSPECT_PAGE", { tabId: tab.id, maxElements: 120 });
+        const inspection = await sendRequest("INSPECT_PAGE", {
+          tabId: tab.id,
+          maxElements: 120,
+        });
         setElements(inspection.elements);
         setElementMeta({
           returned: inspection.returned,
           total: inspection.total,
           truncated: inspection.truncated,
         });
-        logActivity(`Inspected ${inspection.returned} elements on ${inspection.title || inspection.url}.`, "success");
+        logActivity(
+          `Inspected ${inspection.returned} elements on ${inspection.title || inspection.url}.`,
+          "success",
+        );
       } finally {
         setInspecting(false);
       }
@@ -683,7 +762,9 @@ function App() {
     async (mode: "text" | "links") => {
       const tab = activeTab;
       if (!tab?.url) {
-        throw new Error("No active tab is available. Focus a normal tab and reopen the popup.");
+        throw new Error(
+          "No active tab is available. Focus a normal tab and reopen the popup.",
+        );
       }
 
       await ensureSiteAccess(tab.url);
@@ -710,12 +791,17 @@ function App() {
           maxItems: 100,
         });
         const links = extraction.links ?? [];
-        const body = links.map((link) => `${link.text || "(no text)"}\n${link.href}`).join("\n\n");
+        const body = links
+          .map((link) => `${link.text || "(no text)"}\n${link.href}`)
+          .join("\n\n");
         setResult({
           title: `Links (${links.length}${extraction.truncated ? "+" : ""})`,
           body: body || "(No links found.)",
         });
-        logActivity(`Extracted ${links.length}${extraction.truncated ? "+" : ""} links.`, "success");
+        logActivity(
+          `Extracted ${links.length}${extraction.truncated ? "+" : ""} links.`,
+          "success",
+        );
       } finally {
         setExtracting(null);
       }
@@ -760,7 +846,9 @@ function App() {
 
     void (async () => {
       try {
-        const all = await chrome.permissions.contains({ origins: ["http://*/*", "https://*/*"] });
+        const all = await chrome.permissions.contains({
+          origins: ["http://*/*", "https://*/*"],
+        });
         if (!cancelled) setAllSitesAllowed(all);
       } catch {
         if (!cancelled) setAllSitesAllowed(false);
@@ -771,7 +859,6 @@ function App() {
       } catch (error) {
         if (!cancelled) logActivity(errorMessage(error), "error");
       }
-
     })();
 
     return () => {
@@ -786,7 +873,9 @@ function App() {
     }
   }, [activeTab]);
 
-  const canOperate = Boolean(activeTab?.url && isSupportedPageUrl(activeTab.url));
+  const canOperate = Boolean(
+    activeTab?.url && isSupportedPageUrl(activeTab.url),
+  );
   const busy = inspecting || extracting !== null;
 
   // Grant access to the active tab's site.
@@ -794,7 +883,9 @@ function App() {
     run(async () => {
       const tab = activeTab;
       if (!tab?.url) {
-        throw new Error("No active tab is available. Focus a normal tab and reopen the popup.");
+        throw new Error(
+          "No active tab is available. Focus a normal tab and reopen the popup.",
+        );
       }
       if (activeSiteAllowed) {
         logActivity("Site access is already allowed.");
@@ -842,7 +933,10 @@ function App() {
 
     run(async () => {
       await ensureSiteAccess(targetUrl);
-      const target = await sendRequest("NAVIGATE", { tabId: tab.id, url: targetUrl });
+      const target = await sendRequest("NAVIGATE", {
+        tabId: tab.id,
+        url: targetUrl,
+      });
       setActiveTab(target);
       setNavigateUrl(target.url);
       await refreshActiveTab();
@@ -851,9 +945,11 @@ function App() {
       try {
         await inspectActivePage(target, true);
       } catch (error) {
-        logActivity(`Navigated, but inspection failed: ${errorMessage(error)}`, "error");
+        logActivity(
+          `Navigated, but inspection failed: ${errorMessage(error)}`,
+          "error",
+        );
       }
-
     });
   };
 
@@ -866,8 +962,14 @@ function App() {
     }
     run(async () => {
       await ensureSiteAccess(tab.url);
-      const interaction = await sendRequest("CLICK_ELEMENT", { tabId: tab.id, ref: element.ref });
-      logActivity(`Clicked ${element.ref}. Page: ${interaction.title || interaction.url}`, "success");
+      const interaction = await sendRequest("CLICK_ELEMENT", {
+        tabId: tab.id,
+        ref: element.ref,
+      });
+      logActivity(
+        `Clicked ${element.ref}. Page: ${interaction.title || interaction.url}`,
+        "success",
+      );
     });
   };
 
@@ -880,8 +982,15 @@ function App() {
     }
     run(async () => {
       await ensureSiteAccess(tab.url);
-      const interaction = await sendRequest("TYPE_ELEMENT", { tabId: tab.id, ref: element.ref, text });
-      logActivity(`Filled ${element.ref}. Page: ${interaction.title || interaction.url}`, "success");
+      const interaction = await sendRequest("TYPE_ELEMENT", {
+        tabId: tab.id,
+        ref: element.ref,
+        text,
+      });
+      logActivity(
+        `Filled ${element.ref}. Page: ${interaction.title || interaction.url}`,
+        "success",
+      );
     });
   };
 
@@ -890,7 +999,11 @@ function App() {
       <Header bridge={bridge} />
 
       {bridge && bridge.state !== "connected" ? (
-        <BridgeBanner status={bridge} reconnecting={reconnecting} onRetry={handleRetry} />
+        <BridgeBanner
+          status={bridge}
+          reconnecting={reconnecting}
+          onRetry={handleRetry}
+        />
       ) : null}
 
       <ActiveCard
@@ -942,6 +1055,7 @@ function App() {
 
 // Mount the popup into its HTML root element.
 const rootElement = document.getElementById("root");
-if (!rootElement) throw new Error("The extension popup is missing its root element.");
+if (!rootElement)
+  throw new Error("The extension popup is missing its root element.");
 
 createRoot(rootElement).render(<App />);

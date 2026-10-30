@@ -6,6 +6,7 @@ import type {
   ExtractionResult,
   InspectionResult,
   InteractionResult,
+  PageClickTarget,
   PageExtractionResult,
   PageInspectionResult,
   PageInteractionResult,
@@ -147,7 +148,7 @@ export type ExtensionAction = keyof ExtensionActionMap;
 export interface PageActionMap {
   PING: { payload: EmptyPayload; result: { ready: true } };
   INSPECT_PAGE: { payload: { maxElements?: number | undefined }; result: PageInspectionResult };
-  CLICK_ELEMENT: { payload: { ref: string }; result: PageInteractionResult };
+  PREPARE_CLICK: { payload: { ref: string }; result: PageClickTarget };
   TYPE_ELEMENT: {
     payload: { ref: string; text: string; submit?: boolean | undefined };
     result: PageInteractionResult;

@@ -21,7 +21,7 @@ export function parsePageRequest(value: unknown): PageRequest | null {
       return maxElements === undefined ? { id, action, payload: {} } : { id, action, payload: { maxElements } };
     }
 
-    case "CLICK_ELEMENT": {
+    case "PREPARE_CLICK": {
       const ref = payload.ref;
       if (typeof ref !== "string" || !REF_PATTERN.test(ref)) return null;
       return { id, action, payload: { ref } };
