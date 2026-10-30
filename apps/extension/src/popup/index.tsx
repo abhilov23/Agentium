@@ -16,14 +16,6 @@ import { isSupportedPageUrl, originPattern } from "../shared/urls";
 type ActivityTone = "info" | "success" | "error";
 type SiteState = "unknown" | "allowed" | "missing" | "unsupported";
 
-// One line in the activity log.
-interface ActivityEntry {
-  id: string;
-  message: string;
-  tone: ActivityTone;
-  timestamp: Date;
-}
-
 // Counts shown above the inspected element list.
 interface ElementMeta {
   returned: number;
@@ -37,12 +29,6 @@ interface ResultState {
   body: string;
 }
 
-const timeFormatter = new Intl.DateTimeFormat(undefined, {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-});
-
 // Use a readable fallback when a tab has no title.
 function titleOf(tab: TabInfo): string {
   return tab.title || "(untitled)";
@@ -51,16 +37,6 @@ function titleOf(tab: TabInfo): string {
 // Use a readable fallback when a tab has no URL.
 function urlOf(tab: TabInfo): string {
   return tab.url || "(no URL)";
-}
-
-// Get the first letter of the site host for the tab avatar.
-function initialOf(tab: TabInfo): string {
-  try {
-    const host = new URL(tab.url).hostname.replace(/^www\./, "");
-    return host.charAt(0).toUpperCase() || "?";
-  } catch {
-    return "?";
-  }
 }
 
 // Add https:// when needed and reject non-web URLs.
@@ -77,7 +53,7 @@ function normalizeUrl(value: string): string {
   }
 
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new Error("FoundryLens only supports http and https pages.");
+    throw new Error("Agentium only supports http and https pages.");
   }
   return url.href;
 }
@@ -97,7 +73,7 @@ function bridgeDetail(status: BridgeStatus): string {
   }
   const retrySeconds =
     status.nextRetryAt === null ? null : Math.max(0, Math.ceil((status.nextRetryAt - Date.now()) / 1000));
-  const base = status.lastError ?? "Start the FoundryLens Web MCP server, then retry.";
+  const base = status.lastError ?? "Start the Agentium Web MCP server, then retry.";
   return retrySeconds !== null && retrySeconds > 0 ? `${base} Retrying in ${retrySeconds}s.` : base;
 }
 
@@ -134,15 +110,6 @@ function IconArrow() {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true">
       <path d="M4 10h11M11 6l4 4-4 4" />
-    </svg>
-  );
-}
-
-function IconRefresh() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true">
-      <path d="M16 10a6 6 0 1 1-1.8-4.3" />
-      <path d="M16 4v4h-4" />
     </svg>
   );
 }
@@ -208,8 +175,8 @@ function Header({ bridge }: { bridge: BridgeStatus | null }) {
           <LogoMark />
         </span>
         <div className="brand-copy">
-          <h1>FoundryLens</h1>
-          <p>Agent bridge for your browser</p>
+          <h1>Agentium</h1>
+          <p>Local browser automation</p>
         </div>
       </div>
       <span
@@ -313,7 +280,7 @@ function ActiveCard({
           ? "Waiting for an active tab…"
           : activeTab
             ? urlOf(activeTab)
-            : "Focus a normal browser tab and reopen FoundryLens."}
+            : "Focus a normal browser tab and reopen Agentium."}
       </p>
 
       <div className="meta-row">
@@ -543,101 +510,6 @@ function ElementsCard({
   );
 }
 
-// List of all open browser tabs.
-function TabsCard({
-  tabs,
-  loading,
-  onRefresh,
-}: {
-  tabs: TabInfo[];
-  loading: boolean;
-  onRefresh: () => void;
-}) {
-  return (
-    <section className="card">
-      <div className="section-head">
-        <div className="section-title">
-          <p className="eyebrow">Browser</p>
-          <h2>Open tabs</h2>
-        </div>
-        <button type="button" className="icon-button" onClick={onRefresh} title="Refresh tabs" aria-label="Refresh tabs">
-          <IconRefresh />
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="empty-state">
-          <p>Loading tabs…</p>
-        </div>
-      ) : tabs.length === 0 ? (
-        <div className="empty-state">
-          <p>No tabs are available.</p>
-        </div>
-      ) : (
-        <ul className="tab-list">
-          {tabs.map((tab) => (
-            <li key={tab.id} className={tab.active ? "tab-row active" : "tab-row"}>
-              <span className="tab-avatar" aria-hidden="true">
-                {initialOf(tab)}
-              </span>
-              <div className="tab-copy">
-                <span className="tab-title" title={titleOf(tab)}>
-                  {titleOf(tab)}
-                </span>
-                <span className="tab-url" title={urlOf(tab)}>
-                  {urlOf(tab)}
-                </span>
-              </div>
-              <span className="tab-count">#{tab.id}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
-
-// Recent bridge events and page actions.
-function ActivityCard({
-  activity,
-  onClear,
-}: {
-  activity: ActivityEntry[];
-  onClear: () => void;
-}) {
-  return (
-    <section className="card">
-      <div className="section-head">
-        <div className="section-title">
-          <p className="eyebrow">Session</p>
-          <h2>Activity</h2>
-        </div>
-        <button type="button" className="text-button" onClick={onClear} disabled={activity.length === 0}>
-          Clear
-        </button>
-      </div>
-
-      {activity.length === 0 ? (
-        <div className="empty-state">
-          <p>Bridge events and page actions will appear here.</p>
-        </div>
-      ) : (
-        <ol className="activity-list" aria-live="polite">
-          {activity.map((entry) => (
-            <li key={entry.id} className="activity-item" data-tone={entry.tone}>
-              <span className="activity-dot" aria-hidden="true" />
-              <div className="activity-copy">
-                <p>{entry.message}</p>
-                <time dateTime={entry.timestamp.toISOString()}>{timeFormatter.format(entry.timestamp)}</time>
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
-  );
-}
-
 // Footer with privacy note and extension version.
 function Footer({ version }: { version: string }) {
   return (
@@ -666,26 +538,21 @@ function App() {
   const [elementMeta, setElementMeta] = useState<ElementMeta | null>(null);
   const [inspecting, setInspecting] = useState(false);
   const [extracting, setExtracting] = useState<"text" | "links" | null>(null);
-  const [tabs, setTabs] = useState<TabInfo[]>([]);
-  const [tabsLoading, setTabsLoading] = useState(true);
-  const [activity, setActivity] = useState<ActivityEntry[]>([]);
   const [result, setResult] = useState<ResultState | null>(null);
   const [navigateUrl, setNavigateUrl] = useState("");
   const previousBridgeState = useRef<BridgeConnectionState | null>(null);
 
-  // Add an entry to the activity log, keeping only the newest 30.
+  // Keep action feedback in the console rather than in a noisy popup queue.
   const logActivity = useCallback((message: string, tone: ActivityTone = "info") => {
-    setActivity((current) =>
-      [
-        {
-          id: crypto.randomUUID(),
-          message,
-          tone,
-          timestamp: new Date(),
-        },
-        ...current,
-      ].slice(0, 30),
-    );
+    if (tone === "error") {
+      console.error(message);
+      return;
+    }
+    if (tone === "success") {
+      console.info(message);
+      return;
+    }
+    console.log(message);
   }, []);
 
   // Update bridge state and log meaningful connection changes.
@@ -748,17 +615,6 @@ function App() {
     }
   }, []);
 
-  // Reload the list of open tabs.
-  const refreshTabs = useCallback(async () => {
-    setTabsLoading(true);
-    try {
-      const nextTabs = await sendRequest("LIST_TABS", {});
-      setTabs(nextTabs);
-    } finally {
-      setTabsLoading(false);
-    }
-  }, []);
-
   // Run an async action and log any failure.
   const run = useCallback(
     (task: () => Promise<void>) => {
@@ -771,7 +627,7 @@ function App() {
   const ensureSiteAccess = useCallback(
     async (url: string) => {
       if (!isSupportedPageUrl(url)) {
-        throw new Error("FoundryLens only supports http and https pages.");
+        throw new Error("Agentium only supports http and https pages.");
       }
 
       if (allSitesAllowed) return;
@@ -916,17 +772,12 @@ function App() {
         if (!cancelled) logActivity(errorMessage(error), "error");
       }
 
-      try {
-        await refreshTabs();
-      } catch (error) {
-        if (!cancelled) logActivity(errorMessage(error), "error");
-      }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [logActivity, refreshActiveTab, refreshTabs]);
+  }, [logActivity, refreshActiveTab]);
 
   // Keep the URL field in sync unless the user is editing it.
   useEffect(() => {
@@ -1003,11 +854,6 @@ function App() {
         logActivity(`Navigated, but inspection failed: ${errorMessage(error)}`, "error");
       }
 
-      try {
-        await refreshTabs();
-      } catch {
-        return;
-      }
     });
   };
 
@@ -1088,10 +934,6 @@ function App() {
         onClick={handleElementClick}
         onFill={handleElementFill}
       />
-
-      <TabsCard tabs={tabs} loading={tabsLoading} onRefresh={() => run(refreshTabs)} />
-
-      <ActivityCard activity={activity} onClear={() => setActivity([])} />
 
       <Footer version={chrome.runtime.getManifest().version} />
     </main>

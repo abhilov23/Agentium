@@ -63,7 +63,7 @@ export function connectBridge(): void {
     clearReconnectTimer();
     void chrome.alarms.clear(BRIDGE_RECONNECT_ALARM).catch(() => undefined);
     updateActionStatus();
-    console.log("[FoundryLens] connected to MCP bridge");
+    console.log("[Agentium] connected to MCP bridge");
   });
 
   next.addEventListener("message", (event) => {
@@ -78,12 +78,12 @@ export function connectBridge(): void {
     lastError = closeMessage(event, lastError);
     nextRetryAt = null;
     updateActionStatus();
-    console.warn(`[FoundryLens] disconnected from MCP bridge: ${lastError}`);
+    console.warn(`[Agentium] disconnected from MCP bridge: ${lastError}`);
     scheduleReconnect();
   });
 
   next.addEventListener("error", () => {
-    lastError = `Could not reach ${BRIDGE_WEBSOCKET_URL}. Start the FoundryLens MCP server, then click Retry.`;
+    lastError = `Could not reach ${BRIDGE_WEBSOCKET_URL}. Start the Agentium MCP server, then click Retry.`;
     updateActionStatus();
     next.close();
   });
@@ -168,7 +168,7 @@ function closeMessage(event: CloseEvent, fallback: string | null): string {
   if (event.reason) return event.reason;
   if (fallback) return fallback;
   if (event.code === 1006) {
-    return `Could not reach ${BRIDGE_WEBSOCKET_URL}. Start the FoundryLens MCP server, then click Retry.`;
+    return `Could not reach ${BRIDGE_WEBSOCKET_URL}. Start the Agentium MCP server, then click Retry.`;
   }
   return `The MCP bridge closed the connection (code ${event.code}). Retrying automatically.`;
 }
@@ -178,10 +178,10 @@ function updateActionStatus(): void {
   const badge = state === "connected" ? "ON" : state === "connecting" ? "..." : "";
   const title =
     state === "connected"
-      ? "FoundryLens - connected to MCP"
+      ? "Agentium - connected to MCP"
       : state === "connecting"
-        ? "FoundryLens - connecting to MCP"
-        : "FoundryLens - MCP not connected. Click for details.";
+        ? "Agentium - connecting to MCP"
+        : "Agentium - MCP not connected. Click for details.";
 
   void chrome.action.setBadgeText({ text: badge });
   void chrome.action.setBadgeBackgroundColor({ color: state === "connected" ? "#176b53" : "#b7791f" });

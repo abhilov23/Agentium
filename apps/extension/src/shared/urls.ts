@@ -20,7 +20,7 @@ export function originPattern(value: string): string {
     throw new ExtensionError(`"${value}" is not a valid URL.`);
   }
   if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new ExtensionError("FoundryLens only supports http and https pages.");
+    throw new ExtensionError("Agentium only supports http and https pages.");
   }
   return `${url.origin}/*`;
 }

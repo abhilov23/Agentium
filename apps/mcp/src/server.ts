@@ -16,7 +16,7 @@ export const server = new McpServer(
   },
   {
     instructions:
-      "Agentium controls the user's real Chrome browser through the FoundryLens extension. Call browser_tabs first to see open tabs, then pass a tabId to the other tools; when tabId is omitted, the active tab is used. Use browser_open_tab to create a new tab, browser_switch_tab to focus an existing tab, and browser_close_tab to close one. Call browser_inspect before browser_click or browser_type to obtain element refs, which are valid only for the current page state. The extension can access normal http and https websites; Chrome-internal pages cannot be controlled. Use browser_extract to read text or links instead of requesting raw HTML.",
+      "Agentium controls the user's real Chrome browser through the Agentium extension. Call browser_tabs first to see open tabs, then pass a tabId to the other tools; when tabId is omitted, the active tab is used. Use browser_open_tab to create a new tab, browser_switch_tab to focus an existing tab, and browser_close_tab to close one. Call browser_inspect before browser_click or browser_type to obtain element refs, which are valid only for the current page state. The extension can access normal http and https websites; Chrome-internal pages cannot be controlled. Use browser_extract to read text or links instead of requesting raw HTML.",
   },
 );
 

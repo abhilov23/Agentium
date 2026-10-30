@@ -13,6 +13,6 @@ export async function assertSiteAuthorized(url: string): Promise<void> {
   if (await isSiteAuthorized(url)) return;
   const origin = new URL(url).origin;
   throw new ExtensionError(
-    `FoundryLens does not have access to ${origin}. Open the extension popup and allow access to this site.`,
+    `Agentium does not have access to ${origin}. Open the extension popup and allow access to this site.`,
   );
 }

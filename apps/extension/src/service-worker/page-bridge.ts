@@ -23,12 +23,12 @@ export async function ensureContentScript(tabId: number): Promise<void> {
     await chrome.scripting.executeScript({ target: { tabId }, files: ["content/index.js"] });
   } catch (error) {
     throw new ExtensionError(
-      `FoundryLens cannot inject its page helper into this tab. Chrome blocks extensions on internal pages: ${errorMessage(error)}`,
+      `Agentium cannot inject its page helper into this tab. Chrome blocks extensions on internal pages: ${errorMessage(error)}`,
     );
   }
 
   if (!(await ping(tabId))) {
-    throw new ExtensionError("FoundryLens loaded its page helper but the page did not respond. Reload the page and try again.");
+    throw new ExtensionError("Agentium loaded its page helper but the page did not respond. Reload the page and try again.");
   }
 }
 

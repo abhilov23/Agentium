@@ -1,6 +1,6 @@
 {
 	"servers": {
-		"foundrylens-web": {
+		"agentium-web": {
 			"type": "stdio",
 			"command": "node",
 			"args": [
