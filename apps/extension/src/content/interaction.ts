@@ -89,6 +89,55 @@ export function hoverElement(registry: ElementRegistry, ref: string): { x: numbe
   return { x: Math.round(window.scrollX + x), y: Math.round(window.scrollY + y) };
 }
 
+export function waitForSelector(
+  selector: string,
+  timeoutMs = 10_000,
+  visibleOnly = false,
+): Promise<{ selector: string; found: boolean; visible: boolean; url: string; title: string }> {
+  return new Promise((resolve) => {
+    const startedAt = Date.now();
+
+    const tick = () => {
+      const match = document.querySelector(selector);
+      if (match) {
+        const visible = !visibleOnly || isVisible(match);
+        if (visible) {
+          resolve({ selector, found: true, visible: true, url: location.href, title: document.title });
+          return;
+        }
+      }
+
+      if (Date.now() - startedAt >= timeoutMs) {
+        resolve({ selector, found: false, visible: false, url: location.href, title: document.title });
+        return;
+      }
+
+      setTimeout(tick, 100);
+    };
+
+    tick();
+  });
+}
+
+export function getPageState(): {
+  url: string;
+  title: string;
+  readyState: DocumentReadyState;
+  viewport: { width: number; height: number };
+  isInteractive: boolean;
+} {
+  return {
+    url: location.href,
+    title: document.title,
+    readyState: document.readyState,
+    viewport: {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    },
+    isInteractive: document.readyState === "interactive" || document.readyState === "complete",
+  };
+}
+
 // Fill an input, textarea, or editable element by ref.
 export function typeElement(
   registry: ElementRegistry,

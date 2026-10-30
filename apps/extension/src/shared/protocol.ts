@@ -9,6 +9,8 @@ import type {
   PageExtractionResult,
   PageInspectionResult,
   PageInteractionResult,
+  PageState,
+  SelectorWaitResult,
   TabInfo,
 } from "./types";
 
@@ -72,6 +74,14 @@ export interface ExtensionActionMap {
     payload: { tabId?: number | undefined; url?: string | undefined };
     result: { tabId: number; url: string; cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number | null; secure: boolean; httpOnly: boolean; sameSite?: string | null }> };
   };
+  WAIT_FOR_SELECTOR: {
+    payload: { tabId?: number | undefined; selector: string; timeoutMs?: number | undefined; visibleOnly?: boolean | undefined };
+    result: SelectorWaitResult;
+  };
+  GET_PAGE_STATE: {
+    payload: { tabId?: number | undefined };
+    result: PageState;
+  };
   INSPECT_PAGE: {
     payload: { tabId?: number | undefined; maxElements?: number | undefined };
     result: InspectionResult;
@@ -117,6 +127,14 @@ export interface PageActionMap {
   HOVER_ELEMENT: {
     payload: { ref: string };
     result: { x: number; y: number };
+  };
+  WAIT_FOR_SELECTOR: {
+    payload: { selector: string; timeoutMs?: number | undefined; visibleOnly?: boolean | undefined };
+    result: { selector: string; found: boolean; visible: boolean; url: string; title: string };
+  };
+  GET_PAGE_STATE: {
+    payload: EmptyPayload;
+    result: { url: string; title: string; readyState: DocumentReadyState; viewport: { width: number; height: number }; isInteractive: boolean };
   };
   EXTRACT_CONTENT: {
     payload: { format?: "text" | "links" | undefined; maxChars?: number | undefined; maxItems?: number | undefined };

@@ -93,6 +93,24 @@ export interface PageExtractionResult {
   truncated: boolean;
 }
 
+export interface SelectorWaitResult {
+  tabId: number;
+  selector: string;
+  found: boolean;
+  visible: boolean;
+  url: string;
+  title: string;
+}
+
+export interface PageState {
+  tabId: number;
+  url: string;
+  title: string;
+  readyState: DocumentReadyState;
+  viewport: { width: number; height: number };
+  isInteractive: boolean;
+}
+
 // Extraction result with the tab id added by the service worker.
 export interface ExtractionResult extends PageExtractionResult {
   tabId: number;

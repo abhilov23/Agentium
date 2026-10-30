@@ -4,7 +4,7 @@ import type { PageRequest, ResponseEnvelope } from "../shared/protocol";
 import { requestIdOf } from "../shared/request-id";
 import { extractContent } from "./extraction";
 import { inspectPage } from "./inspection";
-import { clickElement, hoverElement, scrollPage, typeElement } from "./interaction";
+import { clickElement, getPageState, hoverElement, scrollPage, typeElement, waitForSelector } from "./interaction";
 import { ElementRegistry } from "./refs";
 import { parsePageRequest } from "./validation";
 
@@ -31,6 +31,10 @@ function handleRequest(request: PageRequest): unknown {
       return scrollPage(request.payload);
     case "HOVER_ELEMENT":
       return hoverElement(registry, request.payload.ref);
+    case "WAIT_FOR_SELECTOR":
+      return waitForSelector(request.payload.selector, request.payload.timeoutMs, request.payload.visibleOnly);
+    case "GET_PAGE_STATE":
+      return getPageState();
     case "EXTRACT_CONTENT":
       return extractContent(request.payload);
   }

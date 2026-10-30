@@ -269,6 +269,33 @@ server.registerTool(
 );
 
 server.registerTool(
+  "browser_wait_for_selector",
+  {
+    description: "Wait until a CSS selector appears or becomes visible in the page before continuing.",
+    inputSchema: {
+      tabId,
+      selector: z.string().min(1).max(2048).describe("CSS selector to wait for."),
+      timeoutMs: z.number().int().min(100).max(60_000).optional().describe("Timeout in milliseconds."),
+      visibleOnly: z.boolean().optional().describe("Require the element to be visible before succeeding."),
+    },
+  },
+  async ({ tabId: selectedTabId, selector, timeoutMs, visibleOnly }) =>
+    runTool(() =>
+      extensionBridge.request("WAIT_FOR_SELECTOR", { tabId: selectedTabId, selector, timeoutMs, visibleOnly }),
+    ),
+);
+
+server.registerTool(
+  "browser_get_page_state",
+  {
+    description: "Get the page URL, title, readiness state, and viewport details for the active or selected tab.",
+    inputSchema: { tabId },
+  },
+  async ({ tabId: selectedTabId }) =>
+    runTool(() => extensionBridge.request("GET_PAGE_STATE", { tabId: selectedTabId })),
+);
+
+server.registerTool(
   "browser_extract",
   {
     description:

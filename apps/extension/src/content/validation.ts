@@ -39,6 +39,23 @@ export function parsePageRequest(value: unknown): PageRequest | null {
         : { id, action, payload: { ref, text, submit } };
     }
 
+    case "WAIT_FOR_SELECTOR": {
+      const selector = payload.selector;
+      const timeoutMs = payload.timeoutMs;
+      const visibleOnly = payload.visibleOnly;
+      if (typeof selector !== "string" || selector.length === 0 || selector.length > 2048) return null;
+      if (timeoutMs !== undefined && !isBoundedInteger(timeoutMs, 100, 60_000)) return null;
+      if (visibleOnly !== undefined && typeof visibleOnly !== "boolean") return null;
+
+      const parsedPayload: { selector: string; timeoutMs?: number; visibleOnly?: boolean } = { selector };
+      if (timeoutMs !== undefined) parsedPayload.timeoutMs = timeoutMs;
+      if (visibleOnly !== undefined) parsedPayload.visibleOnly = visibleOnly;
+      return { id, action, payload: parsedPayload };
+    }
+
+    case "GET_PAGE_STATE":
+      return { id, action, payload: {} };
+
     case "EXTRACT_CONTENT": {
       const format = payload.format;
       const maxChars = payload.maxChars;

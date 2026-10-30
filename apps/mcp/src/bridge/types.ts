@@ -153,6 +153,14 @@ export interface BridgeActionMap {
     payload: { tabId?: number | undefined; url?: string | undefined };
     result: { tabId: number; url: string; cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number | null; secure: boolean; httpOnly: boolean; sameSite?: string | null }> };
   };
+  WAIT_FOR_SELECTOR: {
+    payload: { tabId?: number | undefined; selector: string; timeoutMs?: number | undefined; visibleOnly?: boolean | undefined };
+    result: { tabId: number; selector: string; found: boolean; visible: boolean; url: string; title: string };
+  };
+  GET_PAGE_STATE: {
+    payload: { tabId?: number | undefined };
+    result: { tabId: number; url: string; title: string; readyState: DocumentReadyState; viewport: { width: number; height: number }; isInteractive: boolean };
+  };
   EXTRACT_CONTENT: {
     payload: {
       tabId?: number | undefined;

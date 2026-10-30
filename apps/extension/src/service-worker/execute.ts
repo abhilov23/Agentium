@@ -136,6 +136,22 @@ async function dispatch(request: ExtensionRequest): Promise<unknown> {
       return getCookies(tab.id, request.payload.url ?? tab.url);
     }
 
+    case "WAIT_FOR_SELECTOR": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      const result = await sendPageRequest(tab.id, "WAIT_FOR_SELECTOR", {
+        selector: request.payload.selector,
+        timeoutMs: request.payload.timeoutMs,
+        visibleOnly: request.payload.visibleOnly,
+      });
+      return { tabId: tab.id, ...result };
+    }
+
+    case "GET_PAGE_STATE": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      const result = await sendPageRequest(tab.id, "GET_PAGE_STATE", {});
+      return { tabId: tab.id, ...result };
+    }
+
     case "EXTRACT_CONTENT": {
       const tab = await requireAuthorizedTab(request.payload.tabId);
       const result = await sendPageRequest(tab.id, "EXTRACT_CONTENT", {
