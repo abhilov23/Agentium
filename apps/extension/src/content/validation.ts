@@ -56,6 +56,19 @@ export function parsePageRequest(value: unknown): PageRequest | null {
     case "GET_PAGE_STATE":
       return { id, action, payload: {} };
 
+    case "FIND_TEXT": {
+      const query = payload.query;
+      const exact = payload.exact;
+      const maxMatches = payload.maxMatches;
+      if (typeof query !== "string" || query.length === 0 || query.length > 2048) return null;
+      if (exact !== undefined && typeof exact !== "boolean") return null;
+      if (maxMatches !== undefined && !isBoundedInteger(maxMatches, 1, 50)) return null;
+      const parsedPayload: { query: string; exact?: boolean; maxMatches?: number } = { query };
+      if (exact !== undefined) parsedPayload.exact = exact;
+      if (maxMatches !== undefined) parsedPayload.maxMatches = maxMatches;
+      return { id, action, payload: parsedPayload };
+    }
+
     case "EXTRACT_CONTENT": {
       const format = payload.format;
       const maxChars = payload.maxChars;

@@ -86,6 +86,10 @@ export interface ExtensionActionMap {
     payload: { tabId?: number | undefined };
     result: PageState;
   };
+  FIND_TEXT: {
+    payload: { tabId?: number | undefined; query: string; exact?: boolean | undefined; maxMatches?: number | undefined };
+    result: { tabId: number; query: string; matches: Array<{ text: string; tag: string; selector: string; href?: string; role?: string }>; total: number; truncated: boolean; url: string; title: string };
+  };
   INSPECT_PAGE: {
     payload: { tabId?: number | undefined; maxElements?: number | undefined };
     result: InspectionResult;
@@ -139,6 +143,10 @@ export interface PageActionMap {
   GET_PAGE_STATE: {
     payload: EmptyPayload;
     result: { url: string; title: string; readyState: DocumentReadyState; viewport: { width: number; height: number }; isInteractive: boolean };
+  };
+  FIND_TEXT: {
+    payload: { query: string; exact?: boolean | undefined; maxMatches?: number | undefined };
+    result: { query: string; matches: Array<{ text: string; tag: string; selector: string; href?: string; role?: string }>; total: number; truncated: boolean; url: string; title: string };
   };
   EXTRACT_CONTENT: {
     payload: { format?: "text" | "links" | undefined; maxChars?: number | undefined; maxItems?: number | undefined };

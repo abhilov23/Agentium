@@ -131,6 +131,18 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     id: requestId,
+    action: z.literal("FIND_TEXT"),
+    payload: z
+      .object({
+        tabId,
+        query: z.string().min(1).max(2048),
+        exact: z.boolean().optional(),
+        maxMatches: boundedInteger(1, 50).optional(),
+      })
+      .strict(),
+  }),
+  z.object({
+    id: requestId,
     action: z.literal("EXTRACT_CONTENT"),
     payload: z
       .object({

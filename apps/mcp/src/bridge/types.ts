@@ -165,6 +165,10 @@ export interface BridgeActionMap {
     payload: { tabId?: number | undefined; pattern: string; timeoutMs?: number | undefined };
     result: { tabId: number; matched: boolean; url: string | null; pattern: string; elapsedMs: number };
   };
+  FIND_TEXT: {
+    payload: { tabId?: number | undefined; query: string; exact?: boolean | undefined; maxMatches?: number | undefined };
+    result: { tabId: number; query: string; matches: Array<{ text: string; tag: string; selector: string; href?: string; role?: string }>; total: number; truncated: boolean; url: string; title: string };
+  };
   EXTRACT_CONTENT: {
     payload: {
       tabId?: number | undefined;

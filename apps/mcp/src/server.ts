@@ -310,6 +310,21 @@ server.registerTool(
 );
 
 server.registerTool(
+  "browser_find_by_text",
+  {
+    description: "Search the current page for visible text and return the closest matches with selectors.",
+    inputSchema: {
+      tabId,
+      query: z.string().min(1).max(2048).describe("Text to find on the page."),
+      exact: z.boolean().optional().describe("Match only exact text instead of a substring."),
+      maxMatches: z.number().int().min(1).max(50).optional().describe("Maximum number of matches to return."),
+    },
+  },
+  async ({ tabId: selectedTabId, query, exact, maxMatches }) =>
+    runTool(() => extensionBridge.request("FIND_TEXT", { tabId: selectedTabId, query, exact, maxMatches })),
+);
+
+server.registerTool(
   "browser_extract",
   {
     description:

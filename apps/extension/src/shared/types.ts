@@ -111,6 +111,23 @@ export interface PageState {
   isInteractive: boolean;
 }
 
+export interface TextMatch {
+  text: string;
+  tag: string;
+  selector: string;
+  href?: string;
+  role?: string;
+}
+
+export interface TextSearchResult {
+  query: string;
+  matches: TextMatch[];
+  total: number;
+  truncated: boolean;
+  url: string;
+  title: string;
+}
+
 // Extraction result with the tab id added by the service worker.
 export interface ExtractionResult extends PageExtractionResult {
   tabId: number;

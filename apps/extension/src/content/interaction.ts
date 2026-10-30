@@ -138,6 +138,62 @@ export function getPageState(): {
   };
 }
 
+export function findText(
+  query: string,
+  exact = false,
+  maxMatches = 10,
+): { query: string; matches: Array<{ text: string; tag: string; selector: string; href?: string; role?: string }>; total: number; truncated: boolean; url: string; title: string } {
+  const normalizedQuery = query.trim();
+  const limit = Math.max(1, Math.min(maxMatches, 50));
+  const matches: Array<{ text: string; tag: string; selector: string; href?: string; role?: string }> = [];
+
+  const walk = (node: Node, callback: (element: Element) => void): void => {
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const element = node as Element;
+    callback(element);
+    element.childNodes.forEach((child) => walk(child, callback));
+  };
+
+  const matcher = (text: string): boolean => {
+    const value = text.trim();
+    if (!value) return false;
+    if (exact) return value.toLowerCase() === normalizedQuery.toLowerCase();
+    return value.toLowerCase().includes(normalizedQuery.toLowerCase());
+  };
+
+  const visited = new Set<Element>();
+  walk(document.body, (element) => {
+    if (visited.has(element)) return;
+    visited.add(element);
+    if (!(element instanceof HTMLElement)) return;
+
+    const textContent = element.textContent ?? "";
+    const directText = textContent.trim();
+    if (!directText || !matcher(directText)) return;
+
+    if (matches.length >= limit) return;
+    const selector = element.tagName.toLowerCase();
+    const match: { text: string; tag: string; selector: string; href?: string; role?: string } = {
+      text: directText,
+      tag: element.tagName.toLowerCase(),
+      selector,
+    };
+    if (element instanceof HTMLAnchorElement && element.href) match.href = element.href;
+    const role = element.getAttribute("role");
+    if (role) match.role = role;
+    matches.push(match);
+  });
+
+  return {
+    query: normalizedQuery,
+    matches,
+    total: matches.length,
+    truncated: matches.length >= limit,
+    url: location.href,
+    title: document.title,
+  };
+}
+
 // Fill an input, textarea, or editable element by ref.
 export function typeElement(
   registry: ElementRegistry,
