@@ -310,6 +310,20 @@ server.registerTool(
 );
 
 server.registerTool(
+  "browser_wait_for_network_idle",
+  {
+    description: "Wait until the page has been mostly stable for a short idle window before continuing.",
+    inputSchema: {
+      tabId,
+      timeoutMs: z.number().int().min(100).max(60_000).optional().describe("Total time to wait before giving up."),
+      idleMs: z.number().int().min(100).max(10_000).optional().describe("How long the page should stay quiet before success."),
+    },
+  },
+  async ({ tabId: selectedTabId, timeoutMs, idleMs }) =>
+    runTool(() => extensionBridge.request("WAIT_FOR_NETWORK_IDLE", { tabId: selectedTabId, timeoutMs, idleMs })),
+);
+
+server.registerTool(
   "browser_find_by_text",
   {
     description: "Search the current page for visible text and return the closest matches with selectors.",

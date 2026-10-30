@@ -56,6 +56,17 @@ export function parsePageRequest(value: unknown): PageRequest | null {
     case "GET_PAGE_STATE":
       return { id, action, payload: {} };
 
+    case "WAIT_FOR_NETWORK_IDLE": {
+      const timeoutMs = payload.timeoutMs;
+      const idleMs = payload.idleMs;
+      if (timeoutMs !== undefined && !isBoundedInteger(timeoutMs, 100, 60_000)) return null;
+      if (idleMs !== undefined && !isBoundedInteger(idleMs, 100, 10_000)) return null;
+      const parsedPayload: { timeoutMs?: number; idleMs?: number } = {};
+      if (timeoutMs !== undefined) parsedPayload.timeoutMs = timeoutMs;
+      if (idleMs !== undefined) parsedPayload.idleMs = idleMs;
+      return { id, action, payload: parsedPayload };
+    }
+
     case "FIND_TEXT": {
       const query = payload.query;
       const exact = payload.exact;

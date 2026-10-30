@@ -131,6 +131,17 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     id: requestId,
+    action: z.literal("WAIT_FOR_NETWORK_IDLE"),
+    payload: z
+      .object({
+        tabId,
+        timeoutMs: boundedInteger(100, 60_000).optional(),
+        idleMs: boundedInteger(100, 10_000).optional(),
+      })
+      .strict(),
+  }),
+  z.object({
+    id: requestId,
     action: z.literal("FIND_TEXT"),
     payload: z
       .object({

@@ -4,7 +4,7 @@ import type { PageRequest, ResponseEnvelope } from "../shared/protocol";
 import { requestIdOf } from "../shared/request-id";
 import { extractContent } from "./extraction";
 import { inspectPage } from "./inspection";
-import { clickElement, findText, getPageState, hoverElement, scrollPage, typeElement, waitForSelector } from "./interaction";
+import { clickElement, findText, getPageState, hoverElement, scrollPage, typeElement, waitForNetworkIdle, waitForSelector } from "./interaction";
 import { ElementRegistry } from "./refs";
 import { parsePageRequest } from "./validation";
 
@@ -35,6 +35,8 @@ function handleRequest(request: PageRequest): unknown {
       return waitForSelector(request.payload.selector, request.payload.timeoutMs, request.payload.visibleOnly);
     case "GET_PAGE_STATE":
       return getPageState();
+    case "WAIT_FOR_NETWORK_IDLE":
+      return waitForNetworkIdle(request.payload.timeoutMs, request.payload.idleMs);
     case "FIND_TEXT":
       return findText(request.payload.query, request.payload.exact, request.payload.maxMatches);
     case "EXTRACT_CONTENT":

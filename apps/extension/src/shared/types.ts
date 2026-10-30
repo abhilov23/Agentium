@@ -128,6 +128,14 @@ export interface TextSearchResult {
   title: string;
 }
 
+export interface NetworkIdleResult {
+  url: string;
+  title: string;
+  idle: boolean;
+  elapsedMs: number;
+  waitedMs: number;
+}
+
 // Extraction result with the tab id added by the service worker.
 export interface ExtractionResult extends PageExtractionResult {
   tabId: number;

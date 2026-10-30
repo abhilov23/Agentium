@@ -138,6 +138,47 @@ export function getPageState(): {
   };
 }
 
+export function waitForNetworkIdle(
+  timeoutMs = 15_000,
+  idleMs = 500,
+): Promise<{ url: string; title: string; idle: boolean; elapsedMs: number; waitedMs: number }> {
+  const startedAt = Date.now();
+  let lastMutationAt = Date.now();
+  const observer = new MutationObserver(() => {
+    lastMutationAt = Date.now();
+  });
+
+  observer.observe(document.body || document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    characterData: true,
+  });
+
+  return new Promise((resolve) => {
+    const check = (): void => {
+      const elapsedMs = Date.now() - startedAt;
+      const sinceMutation = Date.now() - lastMutationAt;
+      const idle = sinceMutation >= idleMs;
+      if (idle || elapsedMs >= timeoutMs) {
+        observer.disconnect();
+        const waitedMs = Date.now() - startedAt;
+        resolve({
+          url: location.href,
+          title: document.title,
+          idle,
+          elapsedMs,
+          waitedMs,
+        });
+        return;
+      }
+      setTimeout(check, 100);
+    };
+
+    check();
+  });
+}
+
 export function findText(
   query: string,
   exact = false,

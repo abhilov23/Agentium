@@ -158,6 +158,15 @@ async function dispatch(request: ExtensionRequest): Promise<unknown> {
       return waitForUrl(tab.id, request.payload.pattern, request.payload.timeoutMs ?? 15_000);
     }
 
+    case "WAIT_FOR_NETWORK_IDLE": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      const result = await sendPageRequest(tab.id, "WAIT_FOR_NETWORK_IDLE", {
+        timeoutMs: request.payload.timeoutMs,
+        idleMs: request.payload.idleMs,
+      });
+      return { tabId: tab.id, ...result };
+    }
+
     case "FIND_TEXT": {
       const tab = await requireAuthorizedTab(request.payload.tabId);
       const result = await sendPageRequest(tab.id, "FIND_TEXT", {
