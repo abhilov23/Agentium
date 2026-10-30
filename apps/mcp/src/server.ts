@@ -163,6 +163,22 @@ server.registerTool(
 );
 
 server.registerTool(
+  "browser_handle_dialog",
+  {
+    description:
+      "Install a temporary dialog handler for alert/confirm/prompt modals so automation can accept or dismiss them without blocking. Use this before a page action that triggers a modal.",
+    inputSchema: {
+      tabId,
+      type: z.enum(["alert", "confirm", "prompt"]).describe("Dialog type to handle."),
+      accept: z.boolean().optional().describe("Whether to accept the modal instead of dismissing it."),
+      promptText: z.string().max(2048).optional().describe("Value to return for a prompt dialog when accepted."),
+    },
+  },
+  async ({ tabId: selectedTabId, type, accept, promptText }) =>
+    runTool(() => extensionBridge.request("HANDLE_DIALOG", { tabId: selectedTabId, type, accept, promptText })),
+);
+
+server.registerTool(
   "browser_upload_file",
   {
     description:

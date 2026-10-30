@@ -281,6 +281,24 @@ export function typeElement(
   return { url: location.href, title: document.title };
 }
 
+export function handleDialog(
+  type: "alert" | "confirm" | "prompt",
+  accept = true,
+  promptText?: string,
+): { type: "alert" | "confirm" | "prompt"; accepted: boolean; value: string | null; url: string; title: string } {
+  window.alert = (() => undefined) as typeof window.alert;
+  window.confirm = ((() => accept) as unknown) as typeof window.confirm;
+  window.prompt = ((() => (accept ? promptText ?? "" : null)) as unknown) as typeof window.prompt;
+
+  return {
+    type,
+    accepted: accept,
+    value: type === "prompt" ? (accept ? promptText ?? null : null) : null,
+    url: location.href,
+    title: document.title,
+  };
+}
+
 export function uploadFile(
   registry: ElementRegistry,
   ref: string,

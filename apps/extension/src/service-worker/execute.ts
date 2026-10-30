@@ -86,6 +86,16 @@ async function dispatch(request: ExtensionRequest): Promise<unknown> {
       return response;
     }
 
+    case "HANDLE_DIALOG": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      const result = await sendPageRequest(tab.id, "HANDLE_DIALOG", {
+        type: request.payload.type,
+        accept: request.payload.accept,
+        promptText: request.payload.promptText,
+      });
+      return { tabId: tab.id, ...result };
+    }
+
     case "UPLOAD_FILE": {
       const tab = await requireAuthorizedTab(request.payload.tabId);
       const result = await sendPageRequest(tab.id, "UPLOAD_FILE", {

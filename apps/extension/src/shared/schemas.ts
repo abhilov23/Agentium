@@ -45,6 +45,18 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     id: requestId,
+    action: z.literal("HANDLE_DIALOG"),
+    payload: z
+      .object({
+        tabId,
+        type: z.enum(["alert", "confirm", "prompt"]),
+        accept: z.boolean().optional(),
+        promptText: z.string().max(2048).optional(),
+      })
+      .strict(),
+  }),
+  z.object({
+    id: requestId,
     action: z.literal("UPLOAD_FILE"),
     payload: z
       .object({

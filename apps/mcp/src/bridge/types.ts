@@ -133,6 +133,10 @@ export interface BridgeActionMap {
     payload: { tabId?: number | undefined; ref: string; text: string; submit?: boolean | undefined };
     result: InteractionResult;
   };
+  HANDLE_DIALOG: {
+    payload: { tabId?: number | undefined; type: "alert" | "confirm" | "prompt"; accept?: boolean | undefined; promptText?: string | undefined };
+    result: { tabId: number; type: "alert" | "confirm" | "prompt"; accepted: boolean; value: string | null; url: string; title: string };
+  };
   UPLOAD_FILE: {
     payload: { tabId?: number | undefined; ref: string; fileName: string; contentBase64: string; mimeType?: string | undefined };
     result: InteractionResult;

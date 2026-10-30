@@ -39,6 +39,24 @@ export function parsePageRequest(value: unknown): PageRequest | null {
         : { id, action, payload: { ref, text, submit } };
     }
 
+    case "HANDLE_DIALOG": {
+      const type = payload.type;
+      const accept = payload.accept;
+      const promptText = payload.promptText;
+      if (type !== "alert" && type !== "confirm" && type !== "prompt") return null;
+      if (accept !== undefined && typeof accept !== "boolean") return null;
+      if (promptText !== undefined && (typeof promptText !== "string" || promptText.length > 2048)) return null;
+      return {
+        id,
+        action,
+        payload: {
+          type,
+          ...(accept !== undefined ? { accept } : {}),
+          ...(promptText !== undefined ? { promptText } : {}),
+        },
+      };
+    }
+
     case "UPLOAD_FILE": {
       const ref = payload.ref;
       const fileName = payload.fileName;
