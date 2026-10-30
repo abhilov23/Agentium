@@ -52,6 +52,7 @@ async function copyStaticFiles() {
       "src/popup/Epilogue-latin.woff2",
       `${outdir}/popup/Epilogue-latin.woff2`,
     ),
+    cp("README.md", `${outdir}/README.md`),
   ]);
 }
 
