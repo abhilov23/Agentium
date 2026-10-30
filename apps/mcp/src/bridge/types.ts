@@ -161,6 +161,10 @@ export interface BridgeActionMap {
     payload: { tabId?: number | undefined };
     result: { tabId: number; url: string; title: string; readyState: DocumentReadyState; viewport: { width: number; height: number }; isInteractive: boolean };
   };
+  WAIT_FOR_URL: {
+    payload: { tabId?: number | undefined; pattern: string; timeoutMs?: number | undefined };
+    result: { tabId: number; matched: boolean; url: string | null; pattern: string; elapsedMs: number };
+  };
   EXTRACT_CONTENT: {
     payload: {
       tabId?: number | undefined;

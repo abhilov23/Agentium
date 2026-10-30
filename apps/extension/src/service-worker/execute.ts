@@ -22,6 +22,7 @@ import {
   stopLoading,
   switchTab,
   toTabInfo,
+  waitForUrl,
 } from "./tabs";
 
 // Resolve a tab and make sure the extension has permission to use it.
@@ -150,6 +151,11 @@ async function dispatch(request: ExtensionRequest): Promise<unknown> {
       const tab = await requireAuthorizedTab(request.payload.tabId);
       const result = await sendPageRequest(tab.id, "GET_PAGE_STATE", {});
       return { tabId: tab.id, ...result };
+    }
+
+    case "WAIT_FOR_URL": {
+      const tab = await requireAuthorizedTab(request.payload.tabId);
+      return waitForUrl(tab.id, request.payload.pattern, request.payload.timeoutMs ?? 15_000);
     }
 
     case "EXTRACT_CONTENT": {

@@ -120,6 +120,17 @@ export const extensionRequestSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     id: requestId,
+    action: z.literal("WAIT_FOR_URL"),
+    payload: z
+      .object({
+        tabId,
+        pattern: z.string().min(1).max(2048),
+        timeoutMs: boundedInteger(100, 60_000).optional(),
+      })
+      .strict(),
+  }),
+  z.object({
+    id: requestId,
     action: z.literal("EXTRACT_CONTENT"),
     payload: z
       .object({

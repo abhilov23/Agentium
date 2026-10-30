@@ -74,6 +74,10 @@ export interface ExtensionActionMap {
     payload: { tabId?: number | undefined; url?: string | undefined };
     result: { tabId: number; url: string; cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number | null; secure: boolean; httpOnly: boolean; sameSite?: string | null }> };
   };
+  WAIT_FOR_URL: {
+    payload: { tabId?: number | undefined; pattern: string; timeoutMs?: number | undefined };
+    result: { tabId: number; matched: boolean; url: string | null; pattern: string; elapsedMs: number };
+  };
   WAIT_FOR_SELECTOR: {
     payload: { tabId?: number | undefined; selector: string; timeoutMs?: number | undefined; visibleOnly?: boolean | undefined };
     result: SelectorWaitResult;

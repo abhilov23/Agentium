@@ -227,6 +227,34 @@ export async function getNavigationState(tabId?: number): Promise<NavigationStat
   }
 }
 
+export async function waitForUrl(
+  tabId: number,
+  pattern: string,
+  timeoutMs = 15_000,
+): Promise<{ tabId: number; matched: boolean; url: string | null; pattern: string; elapsedMs: number }> {
+  const tab = toTabInfo(await chrome.tabs.get(tabId));
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const currentTab = await chrome.tabs.get(tab.id);
+    const currentUrl = currentTab.url ?? null;
+    if (currentUrl && currentUrl.includes(pattern)) {
+      return { tabId: tab.id, matched: true, url: currentUrl, pattern, elapsedMs: Date.now() - startedAt };
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 150));
+  }
+
+  const finalTab = await chrome.tabs.get(tab.id).catch(() => null);
+  return {
+    tabId: tab.id,
+    matched: false,
+    url: finalTab?.url ?? null,
+    pattern,
+    elapsedMs: Date.now() - startedAt,
+  };
+}
+
 export async function captureScreenshot(
   tabId?: number,
   _fullPage = false,

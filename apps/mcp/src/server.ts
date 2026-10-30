@@ -296,6 +296,20 @@ server.registerTool(
 );
 
 server.registerTool(
+  "browser_wait_for_url",
+  {
+    description: "Wait until a tab URL contains a specific pattern before continuing.",
+    inputSchema: {
+      tabId,
+      pattern: z.string().min(1).max(2048).describe("Sub-string to match in the tab URL."),
+      timeoutMs: z.number().int().min(100).max(60_000).optional().describe("Timeout in milliseconds."),
+    },
+  },
+  async ({ tabId: selectedTabId, pattern, timeoutMs }) =>
+    runTool(() => extensionBridge.request("WAIT_FOR_URL", { tabId: selectedTabId, pattern, timeoutMs })),
+);
+
+server.registerTool(
   "browser_extract",
   {
     description:
