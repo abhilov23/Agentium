@@ -1,12 +1,47 @@
 {
-  "name": "@Agentium/web-intelligence",
-  "version": "0.1.0",
-  "private": true,
+  "name": "agentium-mcp",
+  "version": "0.1.1",
+  "description": "Agentium MCP Server — local-first Chrome browser automation bridge for AI assistants over Model Context Protocol",
   "type": "module",
+  "license": "MIT",
+  "author": "abhilov23",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abhilov23/agentium.git"
+  },
+  "homepage": "https://github.com/abhilov23/agentium#readme",
+  "bugs": {
+    "url": "https://github.com/abhilov23/agentium/issues"
+  },
+  "bin": {
+    "agentium-mcp": "./dist/index.js",
+    "agentium": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "chrome",
+    "automation",
+    "browser",
+    "ai-agent",
+    "claude",
+    "cursor",
+    "devtools"
+  ],
   "scripts": {
     "dev": "tsx src/index.ts",
     "dev:watch": "tsx watch src/index.ts",
     "build": "tsc",
+    "prepublishOnly": "tsc",
     "check-types": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "start": "node dist/index.js"

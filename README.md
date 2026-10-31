@@ -287,7 +287,7 @@ flowchart TB
 
 | Workspace                    | Package                      | Purpose                                                                |
 | ---------------------------- | ---------------------------- | ---------------------------------------------------------------------- |
-| `apps/mcp`                   | `@Agentium/web-intelligence` | stdio MCP server, tool schemas, and local WebSocket bridge.            |
+| `apps/mcp`                   | `agentium-mcp` (npm)         | stdio MCP server, tool schemas, and local WebSocket bridge.            |
 | `apps/extension`             | `@Agentium/extension`        | Chrome MV3 service worker, popup, content script, and browser actions. |
 | `apps/web`                   | `web`                        | Next.js starter app. Not required to run the browser bridge.           |
 | `apps/docs`                  | `docs`                       | Next.js starter app. Not required to run the browser bridge.           |
@@ -333,7 +333,28 @@ After rebuilding the extension, reload it from `chrome://extensions`. Refresh af
 
 ### 4. Configure an MCP client
 
-Run the built MCP entrypoint as an stdio MCP server. Any MCP client that supports stdio servers can use a configuration like this:
+Install the MCP server from npm (no local build required):
+
+```bash
+npx -y agentium-mcp
+```
+
+Then configure your MCP client to run it as an stdio server:
+
+```json
+{
+  "mcpServers": {
+    "agentium": {
+      "command": "npx",
+      "args": ["-y", "agentium-mcp"]
+    }
+  }
+}
+```
+
+The server binds a loopback listener to `ws://127.0.0.1:3777` and waits for your Agentium Chrome Extension to connect.
+
+Alternatively, to run from a local checkout instead of npm:
 
 ```json
 {
@@ -347,8 +368,6 @@ Run the built MCP entrypoint as an stdio MCP server. Any MCP client that support
 ```
 
 Replace the example path with the absolute path to this checkout. On Windows, escape backslashes in the JSON path, for example `C:\\path\\to\\Agentium\\apps\\mcp\\dist\\index.js`.
-
-The client starts the server process. Keep Chrome open and confirm that the extension popup reports **Connected**. If you run the server manually, do not start a second instance while the client is already running one.
 
 ### 5. Verify the connection
 

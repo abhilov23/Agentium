@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // Process entry point: starts the MCP server over stdio.
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 

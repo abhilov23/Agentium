@@ -1,0 +1,9 @@
+{
+  "$schema": "https://skills.sh/schema.json",
+  "skills": {
+    "vgpu": {
+      "source": "vercel-labs/vgpu",
+      "path": ".agents/skills/vgpu"
+    }
+  }
+}

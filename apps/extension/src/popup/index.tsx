@@ -159,9 +159,15 @@ function IconShield() {
 function LogoMark() {
   return (
     <img
-      src="../icons/agentium-32.png"
+      src="../icons/agentium-48.png"
       alt="Agentium"
-      style={{ width: 30, height: 30, display: "block" }}
+      style={{
+        width: 30,
+        height: 30,
+        display: "block",
+        borderRadius: "6px",
+        boxShadow: "0 2px 8px rgba(20, 184, 166, 0.25)"
+      }}
       aria-hidden="true"
     />
   );
