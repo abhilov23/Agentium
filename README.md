@@ -1,4 +1,5 @@
-<img width="2800" height="560" alt="agentium-hero-banner (2)" src="https://github.com/user-attachments/assets/f57ffa6b-a76e-4597-976b-7c6461fa34fc" />
+<img width="2800" height="560" alt="agentium-hero-banner (2)" src="https://github.com/user-attachments/assets/b72bf6cf-5c94-4b88-b479-2414ab098393" />
+
 
 
 Agentium is a local-first bridge between an MCP client and your real Chrome browser. The MCP server exposes typed browser tools over stdio, and a Manifest V3 Chrome extension executes those actions in tabs you authorize.
